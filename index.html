@@ -267,18 +267,34 @@
     function updateCartUI() { const cartItemsContainer = document.getElementById('cartItems'), cartBadge = document.getElementById('cartBadge'); cartItemsContainer.innerHTML = ''; if (cart.length === 0) { cartItemsContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">السلة فارغة</p>'; cartBadge.classList.remove('show'); } else { cartBadge.textContent = cart.length; cartBadge.classList.add('show'); cart.forEach(item => { cartItemsContainer.innerHTML += `<div class="cart-item"><div><div style="font-weight:800; font-size:0.95rem; color:#fff;">${item.title}</div><div style="color:#10b981; font-size:0.85rem;">مجاني</div></div><button class="close-btn" style="color:#ff4d4d; background:transparent;" onclick="removeFromCart('${item.title}')">×</button></div>`; }); } }
     function toggleCart(forceOpen = false) { const sidebar = document.getElementById('cartSidebar'), overlay = document.getElementById('overlay'); if (forceOpen) { sidebar.classList.add('active'); overlay.classList.add('active'); } else { sidebar.classList.remove('active'); overlay.classList.remove('active'); } }
     
-    function checkout() { 
-      if (cart.length === 0) return alert('السلة فارغة!'); 
-      let delay = 0; 
-      cart.forEach(item => { 
-        setTimeout(() => { 
-          window.open(encodeURI(item.file), '_blank');
-        }, delay); 
-        delay += 1000; 
-      }); 
-      alert('بدأ تحميل ملفاتك المجانية!'); 
-      cart = []; updateCartUI(); toggleCart(); 
+    
+      
+      function checkout() { 
+  if (cart.length === 0) return alert('السلة فارغة!'); 
+  let delay = 0; 
+  cart.forEach(item => { 
+    setTimeout(() => { 
+      const link = document.createElement('a');
+      link.href = encodeURI(item.file);
+      link.download = item.title + '.pdf'; 
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, delay); 
+    delay += 1000; 
+  }); 
+  alert('بدأ تحميل ملفاتك المجانية!'); 
+  cart = []; updateCartUI(); toggleCart(); 
     }
+      
+         
+          
+        
+        
+      
+      
+    
+    
     
     const accountBox = document.getElementById('accountBox');
     function isValidEmail(email) { const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; return re.test(String(email).toLowerCase()); }
