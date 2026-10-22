@@ -1,0 +1,2734 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nexus Store | مكتبتك الرقمية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-dark: #05070a;
+      --surface: rgba(20, 25, 35, 0.6);
+      --neon-cyan: #00f0ff;
+      --neon-purple: #b000ff;
+      --neon-pink: #ff007f;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-glow: inset 0 0 20px rgba(0, 240, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+    [data-theme="light"] {
+      --bg-dark: #f4f6f9;
+      --surface: rgba(255, 255, 255, 0.85);
+      --neon-cyan: #0077ff;
+      --neon-purple: #7b2cbf;
+      --neon-pink: #ff007f;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --glass-border: rgba(0, 0, 0, 0.08);
+      --glass-glow: inset 0 0 20px rgba(0, 119, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow-x: hidden;
+      padding-bottom: 100px;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(176, 0, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.12) 0%, transparent 40%);
+      background-attachment: fixed;
+      transition: background-color 0.4s, color 0.4s;
+    }
+    #networkCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 15px; }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 5%; position: fixed; width: 100%; top: 0; z-index: 100;
+      background: var(--surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .logo { font-size: 1.3rem; font-weight: 900; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .search-container { flex: 1; max-width: 400px; margin: 0 20px; position: relative; display: none; }
+    @media(min-width: 768px) { .search-container { display: block; } }
+    .search-bar { width: 100%; padding: 10px 15px 10px 40px; border-radius: 20px; background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-main); font-family: inherit; outline: none; transition: 0.3s; }
+    .search-bar:focus { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0,240,255,0.2); }
+    .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-main); width: 38px; height: 38px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; position: relative; }
+    .icon-btn:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+    .cart-badge { position: absolute; top: -4px; right: -4px; background: var(--neon-pink); color: white; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transform: scale(0); transition: transform 0.3s; }
+    .cart-badge.show { transform: scale(1); }
+    .owner-name { font-size: 0.75rem; font-weight: 700; color: var(--neon-cyan); display: none; }
+    @media(min-width: 768px) { .owner-name { display: block; } }
+    .hero-section { padding: 90px 0 20px; }
+    .hero-card { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; display: flex; align-items: center; gap: 20px; position: relative; overflow: hidden; box-shadow: var(--glass-glow); }
+    .hero-img { width: 120px; height: 160px; border-radius: 12px; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.5); z-index: 1; }
+    .hero-info { z-index: 1; flex: 1; }
+    .hero-tag { background: rgba(0, 240, 255, 0.15); color: var(--neon-cyan); font-size: 0.7rem; padding: 4px 10px; border-radius: 10px; display: inline-block; margin-bottom: 8px; font-weight: bold; }
+    .hero-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 5px; line-height: 1.3; color: var(--text-main); }
+    .hero-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .hero-btn { background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple)); color: #fff; border: none; padding: 8px 20px; border-radius: 10px; font-family: inherit; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+    .hero-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0,240,255,0.4); }
+    .section-title { font-size: 1.1rem; font-weight: 800; margin: 25px 0 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+    .section-title::before { content: ''; display: block; width: 4px; height: 18px; background: var(--neon-cyan); border-radius: 2px; box-shadow: 0 0 10px var(--neon-cyan); }
+    .horizontal-scroll { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .horizontal-scroll::-webkit-scrollbar { display: none; }
+    .book-card { min-width: 150px; max-width: 150px; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 16px; padding: 10px; scroll-snap-align: start; position: relative; transition: 0.3s; cursor: pointer; backdrop-filter: blur(10px); }
+    .book-card:hover { transform: translateY(-5px); border-color: var(--neon-cyan); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+    .book-img-wrap { width: 100%; height: 190px; border-radius: 10px; overflow: hidden; margin-bottom: 10px; position: relative; }
+    .book-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+    .book-card:hover .book-img-wrap img { transform: scale(1.1); }
+    .fav-icon { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.2); z-index: 2; transition: 0.3s; }
+    .fav-icon.active { color: var(--neon-pink); border-color: var(--neon-pink); background: rgba(255,0,127,0.2); box-shadow: 0 0 10px var(--neon-pink); }
+    .book-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); }
+    .book-type { font-size: 0.7rem; color: var(--text-muted); }
+    .premium-badge { position: absolute; top: 8px; left: 8px; z-index: 3; background: linear-gradient(135deg, #ff007f, #b000ff); color: #fff; font-size: 0.55rem; font-weight: 900; padding: 3px 7px; border-radius: 8px; letter-spacing: 0.5px; box-shadow: 0 0 12px rgba(255, 0, 127, 0.7); animation: pulsePremium 2s infinite; }
+    @keyframes pulsePremium { 0%, 100% { box-shadow: 0 0 12px rgba(255, 0, 127, 0.7); } 50% { box-shadow: 0 0 22px rgba(255, 0, 127, 1); } }
+    .categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+    .categories::-webkit-scrollbar { display: none; }
+    .cat-btn { background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-muted); padding: 6px 16px; border-radius: 20px; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: 0.3s; }
+    .cat-btn.active { background: var(--neon-cyan); color: #000; border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0,240,255,0.3); }
+    .bottom-nav { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 650px; height: 65px; background: rgba(20, 25, 35, 0.4); backdrop-filter: blur(40px) saturate(250%); -webkit-backdrop-filter: blur(40px) saturate(250%); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.1); transition: background 0.4s, border-color 0.4s; }
+    [data-theme="light"] .bottom-nav { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.1), inset 0 0 20px rgba(255,255,255,0.5); }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 0.65rem; font-weight: 600; cursor: pointer; transition: 0.3s; gap: 3px; padding: 5px 10px; border-radius: 20px; }
+    .nav-item i { font-size: 1.2rem; }
+    .nav-item.active { color: var(--neon-cyan); background: rgba(0, 240, 255, 0.1); text-shadow: 0 0 10px rgba(0,240,255,0.5); }
+    .nav-item.active i { transform: translateY(-2px); filter: drop-shadow(0 0 5px var(--neon-cyan)); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 2000; display: flex; justify-content: center; align-items: flex-end; opacity: 0; visibility: hidden; transition: 0.3s; }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal-content { width: 100%; max-width: 600px; background: var(--bg-dark); border-radius: 24px 24px 0 0; border: 1px solid var(--glass-border); border-bottom: none; padding: 25px 20px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-height: 85vh; overflow-y: auto; position: relative; }
+    .modal-overlay.active .modal-content { transform: translateY(0); }
+    .close-modal { position: absolute; top: 15px; left: 15px; background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-main); width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+    .modal-header { display: flex; gap: 15px; margin-bottom: 20px; }
+    .modal-img { width: 100px; height: 140px; border-radius: 12px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .modal-info { flex: 1; }
+    .modal-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 5px; color: var(--text-main); }
+    .modal-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px; }
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .action-btn { padding: 12px; border-radius: 12px; font-family: inherit; font-weight: bold; font-size: 0.9rem; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; border: none; transition: 0.3s; }
+    .btn-read { background: var(--surface); color: var(--text-main); border: 1px solid var(--glass-border); }
+    .btn-download { background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple)); color: #fff; }
+    .btn-read:hover, .btn-download:hover { transform: scale(1.02); }
+    .premium-modal-content { background: linear-gradient(160deg, #1a0010, #05070a) !important; border: 2px solid var(--neon-pink) !important; box-shadow: 0 0 40px rgba(255, 0, 127, 0.5), inset 0 0 30px rgba(176, 0, 255, 0.2) !important; }
+    .premium-crown { font-size: 4rem; text-align: center; background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6)); animation: floatCrown 3s ease-in-out infinite; }
+    @keyframes floatCrown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .premium-title { text-align: center; font-size: 1.6rem; font-weight: 900; margin: 15px 0 10px; background: linear-gradient(90deg, #FFD700, #ff007f, #b000ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .premium-soon { text-align: center; color: var(--neon-cyan); font-size: 1rem; font-weight: 800; margin-bottom: 20px; letter-spacing: 1px; }
+    .premium-desc { text-align: center; color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 25px; }
+    .pdf-modal .modal-content { height: 90vh; padding: 0; display: flex; flex-direction: column; }
+    .pdf-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: var(--surface); border-bottom: 1px solid var(--glass-border); }
+    .pdf-frame { flex: 1; width: 100%; border: none; background: #333; }
+    .sidebar { position: fixed; top: 0; right: -100%; width: 85%; max-width: 350px; height: 100vh; background: var(--bg-dark); z-index: 3000; border-left: 1px solid var(--glass-border); transition: right 0.4s; display: flex; flex-direction: column; }
+    .sidebar.active { right: 0; }
+    .sidebar-header { padding: 20px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; }
+    .sidebar-items { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+    .sidebar-footer { padding: 20px; border-top: 1px solid var(--glass-border); }
+    .mobile-search-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 4000; display: none; flex-direction: column; padding: 20px; }
+    .mobile-search-overlay.active { display: flex; }
+    .mobile-search-input { width: 100%; padding: 15px; border-radius: 15px; background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-main); font-family: inherit; font-size: 1rem; margin-bottom: 20px; outline: none; }
+    .mobile-search-results { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .info-card { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 20px; padding: 30px; text-align: center; box-shadow: var(--glass-glow); }
+    .info-card i.main-icon { font-size: 3rem; color: var(--neon-cyan); margin-bottom: 15px; }
+    .info-card h3 { color: var(--text-main); margin-bottom: 10px; font-size: 1.2rem; }
+    .info-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px; }
+    .theme-btn { background: var(--surface); color: var(--text-main); border: 1px solid var(--glass-border); padding: 12px 24px; border-radius: 12px; font-family: inherit; font-weight: bold; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; }
+    .theme-btn:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+    .contact-grid { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+    .contact-action-btn { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 16px; border-radius: 16px; color: #fff; text-decoration: none; font-size: 1.1rem; font-weight: 700; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; border: none; cursor: pointer; }
+    .contact-action-btn i { font-size: 1.5rem; }
+    .contact-action-btn:hover { transform: translateY(-3px) scale(1.02); }
+    .btn-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4); }
+    .btn-email { background: linear-gradient(135deg, #ea4335, #b31412); box-shadow: 0 8px 25px rgba(234, 67, 53, 0.4); }
+    .contact-action-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s; }
+    .contact-action-btn:hover::before { left: 100%; }
+    .tool-card { min-width: 180px; max-width: 180px; background: linear-gradient(145deg, var(--surface), rgba(0, 240, 255, 0.05)); border: 1px solid var(--glass-border); border-radius: 16px; padding: 12px; cursor: pointer; transition: 0.3s; position: relative; }
+    .tool-card:hover { transform: translateY(-5px) scale(1.02); border-color: var(--neon-cyan); box-shadow: 0 10px 25px rgba(0, 240, 255, 0.3); }
+    .tool-icon-wrap { width: 100%; height: 100px; border-radius: 12px; background: linear-gradient(135deg, #306998, #FFD43B); display: flex; justify-content: center; align-items: center; margin-bottom: 10px; position: relative; overflow: hidden; }
+    .tool-icon-wrap::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), transparent 60%); }
+    .tool-icon-wrap i { font-size: 3rem; color: #fff; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); z-index: 1; }
+  </style>
+</head>
+<body>
+
+  <canvas id="networkCanvas"></canvas>
+
+  <header>
+    <div class="logo">Nexus Store</div>
+    <div class="search-container">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="search-bar" id="desktopSearch" placeholder="ابحث عن ملفك هنا...">
+    </div>
+    <div class="header-actions">
+      <span class="owner-name">𝒂𝒃𝒅𝒖𝒍𝒍𝒂𝒉𝒆𝒕𝒆𝒌</span>
+      <button class="icon-btn" onclick="toggleMobileSearch()"><i class="fas fa-search"></i></button>
+      <button class="icon-btn" onclick="toggleSidebar(true)"><i class="fas fa-shopping-basket"></i><span class="cart-badge" id="cartBadge">0</span></button>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="hero-section"><div class="hero-card" id="heroCard"></div></section>
+    <div class="categories" id="categoriesContainer">
+      <button class="cat-btn active" onclick="filterCategory('all', this)">الكل</button>
+      <button class="cat-btn" onclick="filterCategory('philosophy', this)">فلسفة</button>
+      <button class="cat-btn" onclick="filterCategory('arabic', this)">عربي</button>
+      <button class="cat-btn" onclick="filterCategory('science', this)">علوم وفيزياء</button>
+      <button class="cat-btn" onclick="filterCategory('languages', this)">لغات</button>
+    </div>
+    <div id="dynamicSections"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('home', this)"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+    <div class="nav-item" onclick="switchTab('favorites', this)"><i class="fas fa-heart"></i><span>المفضلة</span></div>
+    <div class="nav-item" onclick="switchTab('python', this)"><i class="fab fa-python"></i><span>Python</span></div>
+    <div class="nav-item" onclick="switchTab('settings', this)"><i class="fas fa-cog"></i><span>الإعدادات</span></div>
+    <div class="nav-item" onclick="switchTab('contact', this)"><i class="fas fa-envelope"></i><span>اتصل بنا</span></div>
+  </nav>
+
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-content" id="detailsModalContent">
+      <button class="close-modal" onclick="closeDetails()"><i class="fas fa-times"></i></button>
+      <div class="modal-header">
+        <img src="" id="modalImg" class="modal-img">
+        <div class="modal-info">
+          <h2 class="modal-title" id="modalTitle">اسم الملف</h2>
+          <p class="modal-desc" id="modalDesc">وصف الملف...</p>
+          <div style="font-size: 0.8rem; color: var(--neon-cyan);" id="modalType">النوع</div>
+        </div>
+      </div>
+      <div class="action-grid">
+        <button class="action-btn btn-read" onclick="readCurrentFile()"><i class="fas fa-eye"></i> قراءة</button>
+        <button class="action-btn btn-download" onclick="addCurrentToCart()"><i class="fas fa-download"></i> تحميل</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay pdf-modal" id="pdfModal">
+    <div class="modal-content">
+      <div class="pdf-header">
+        <span id="pdfTitle" style="font-weight: bold; color: var(--neon-cyan);">عنوان الملف</span>
+        <button class="close-modal" style="position: static;" onclick="closePdf()"><i class="fas fa-times"></i></button>
+      </div>
+      <iframe id="pdfFrame" class="pdf-frame" src=""></iframe>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
+  <div class="sidebar" id="cartSidebar">
+    <div class="sidebar-header">
+      <h2 style="font-size: 1.1rem; color: var(--neon-cyan);">سلة التحميل</h2>
+      <button class="close-modal" style="position: static;" onclick="toggleSidebar(false)"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="sidebar-items" id="cartItems"></div>
+    <div class="sidebar-footer">
+      <button class="action-btn btn-download" style="width: 100%;" onclick="downloadAll()"><i class="fas fa-download"></i> تحميل الكل</button>
+    </div>
+  </div>
+
+  <div class="mobile-search-overlay" id="mobileSearchOverlay">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h2 style="color: var(--text-main);">البحث</h2>
+      <button class="close-modal" style="position: static;" onclick="toggleMobileSearch()"><i class="fas fa-times"></i></button>
+    </div>
+    <input type="text" class="mobile-search-input" id="mobileSearchInput" placeholder="اكتب اسم الملف..." oninput="handleMobileSearch(this.value)">
+    <div class="mobile-search-results" id="mobileSearchResults"></div>
+  </div>
+
+  <script>
+    const booksData = [
+      { id: 1, title: 'حل أوراق البلاغة', type: 'عربي', cat: 'arabic', file: 'book1.pdf', img: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=400&auto=format&fit=crop' },
+      { id: 2, title: 'حل أوراق الصرف', type: 'عربي', cat: 'arabic', file: 'book2.pdf', img: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=400&auto=format&fit=crop' },
+      { id: 3, title: 'اختبار نواس مرن + فتل', type: 'فيزياء', cat: 'science', file: 'book3.pdf', img: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=400&auto=format&fit=crop' },
+      { id: 4, title: 'أساس بكلوريا عربي', type: 'عربي', cat: 'arabic', file: 'book4.pdf', img: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=400&auto=format&fit=crop' },
+      { id: 5, title: 'إعراب القصائد', type: 'عربي', cat: 'arabic', file: 'book5.pdf', img: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=400&auto=format&fit=crop' },
+      { id: 6, title: 'الأوراق الذهبية فلسفة', type: 'فلسفة', cat: 'philosophy', file: 'book6.pdf', img: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop' },
+      { id: 7, title: 'الكامل في الفلسفة 2026', type: 'فلسفة', cat: 'philosophy', file: 'book7.pdf', img: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop' },
+      { id: 8, title: 'ترتيب الحوار - فرنسي', type: 'فرنسي', cat: 'languages', file: 'book8.pdf', img: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=400&auto=format&fit=crop' },
+      { id: 9, title: 'تلخيص جميع دروس فلسفة', type: 'فلسفة', cat: 'philosophy', file: 'book9.pdf', img: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop' },
+      { id: 11, title: 'دليل 12 أدبي', type: 'دليل', cat: 'arabic', file: 'book11.pdf', img: 'https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=400&auto=format&fit=crop' },
+      { id: 12, title: 'قواعد الفرنسي', type: 'فرنسي', cat: 'languages', file: 'book12.pdf', img: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=400&auto=format&fit=crop' },
+      { id: 13, title: 'مواضيع الإنكليزي (السعادة)', type: 'إنكليزي', cat: 'languages', file: 'book13.pdf', img: 'https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?q=80&w=400&auto=format&fit=crop' },
+      { id: 14, title: 'نماذج امتحانية للأزمنة', type: 'إنكليزي', cat: 'languages', file: 'book14.pdf', img: 'https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?q=80&w=400&auto=format&fit=crop' },
+      { id: 15, title: 'نموذج فيزياء - نواس ثقلي', type: 'فيزياء', cat: 'science', file: 'book15.pdf', img: 'https://images.unsplash.com/photo-1614849963640-9cc74b2a826f?q=80&w=400&auto=format&fit=crop' },
+      { id: 16, title: 'نوطة عربي بكالوريا', type: 'عربي', cat: 'arabic', file: 'book16.pdf', img: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=400&auto=format&fit=crop' },
+      { id: 17, title: '⭐ أحمد الحامض', type: 'فلسفة · Premium', cat: 'philosophy', file: '', img: 'https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=400&auto=format&fit=crop', premium: true, comingSoon: true },
+      { id: 18, title: 'تاريخ أصفياء الله', type: 'تاريخ', cat: 'philosophy', file: 'book18.pdf', img: 'https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=400&auto=format&fit=crop' }
+    ];
+
+    const toolsData = [
+      {
+        id: 'scanner',
+        title: 'Network Scanner V4',
+        type: 'Ultimate Network Recon',
+        desc: 'أداة شاملة لفحص الشبكة، اكتشاف الأجهزة، فحص المنافذ، وتحديد نظام التشغيل. مبنية بـ Python + Pygame.',
+        sourceId: 'scanner-source',
+        filename: 'network_scanner.py',
+        icon: 'fab fa-python'
+      }
+    ];
+
+    let favorites = JSON.parse(localStorage.getItem('nexus_favs_v3')) || [];
+    let cart = [];
+    let currentBook = null;
+
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.setAttribute('data-theme', 'light');
+    }
+
+    const canvas = document.getElementById('networkCanvas'), ctx = canvas.getContext('2d');
+    let width, height, particles = [];
+    function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    class Particle {
+      constructor() { this.x = Math.random() * width; this.y = Math.random() * height; this.vx = (Math.random() - 0.5) * 0.5; this.vy = (Math.random() - 0.5) * 0.5; this.radius = Math.random() * 1.5 + 0.5; }
+      update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > width) this.vx *= -1; if (this.y < 0 || this.y > height) this.vy *= -1; }
+      draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = 'rgba(0, 240, 255, 0.4)'; ctx.fill(); }
+    }
+    for (let i = 0; i < 50; i++) particles.push(new Particle());
+    function animate() { ctx.clearRect(0, 0, width, height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
+
+    function createCard(book) {
+      const isFav = favorites.includes(book.id);
+      const badge = book.premium ? `<span class="premium-badge">⭐ PREMIUM</span>` : '';
+      return `
+        <div class="book-card" onclick="openDetails(${book.id})">
+          <div class="book-img-wrap">
+            ${badge}
+            <img src="${book.img}" alt="${book.title}" style="${book.comingSoon ? 'filter: brightness(0.7) saturate(1.3);' : ''}">
+            <div class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFav(event, ${book.id})"><i class="fas fa-heart"></i></div>
+          </div>
+          <h3 class="book-title">${book.title}</h3>
+          <span class="book-type">${book.type}</span>
+        </div>`;
+    }
+
+    function createToolCard(tool) {
+      return `
+        <div class="tool-card" onclick="downloadTool('${tool.id}')">
+          <div class="tool-icon-wrap"><i class="${tool.icon}"></i></div>
+          <h3 class="book-title">${tool.title}</h3>
+          <span class="book-type">${tool.type}</span>
+        </div>`;
+    }
+
+    function initHome() {
+      const heroBook = booksData[6];
+      document.getElementById('heroCard').innerHTML = `
+        <img src="${heroBook.img}" class="hero-img">
+        <div class="hero-info">
+          <span class="hero-tag">⭐ الأكثر تميزاً</span>
+          <h2 class="hero-title">${heroBook.title}</h2>
+          <p class="hero-desc">ملخص شامل ومفصل لمادة الفلسفة وفق المنهاج الحديث. جاهز للتحميل والقراءة الآن.</p>
+          <button class="hero-btn" onclick="openDetails(${heroBook.id})"><i class="fas fa-bolt"></i> استكشف الآن</button>
+        </div>`;
+      document.getElementById('dynamicSections').innerHTML = `
+        <h2 class="section-title">أحدث الملفات المضافة</h2>
+        <div class="horizontal-scroll">${booksData.slice(0, 8).map(createCard).join('')}</div>
+        <h2 class="section-title">قسم الفلسفة</h2>
+        <div class="horizontal-scroll">${booksData.filter(b => b.cat === 'philosophy').map(createCard).join('')}</div>
+        <h2 class="section-title">قسم اللغات</h2>
+        <div class="horizontal-scroll">${booksData.filter(b => b.cat === 'languages').map(createCard).join('')}</div>`;
+    }
+
+    function toggleFav(e, id) {
+      e.stopPropagation();
+      const index = favorites.indexOf(id);
+      if (index > -1) { favorites.splice(index, 1); } else { favorites.push(id); }
+      localStorage.setItem('nexus_favs_v3', JSON.stringify(favorites));
+      initHome();
+      if(document.getElementById('detailsModal').classList.contains('active')) openDetails(id);
+    }
+
+    function getDefaultDetailsHTML() {
+      return `
+        <button class="close-modal" onclick="closeDetails()"><i class="fas fa-times"></i></button>
+        <div class="modal-header">
+          <img src="" id="modalImg" class="modal-img">
+          <div class="modal-info">
+            <h2 class="modal-title" id="modalTitle">اسم الملف</h2>
+            <p class="modal-desc" id="modalDesc">وصف الملف...</p>
+            <div style="font-size: 0.8rem; color: var(--neon-cyan);" id="modalType">النوع</div>
+          </div>
+        </div>
+        <div class="action-grid">
+          <button class="action-btn btn-read" onclick="readCurrentFile()"><i class="fas fa-eye"></i> قراءة</button>
+          <button class="action-btn btn-download" onclick="addCurrentToCart()"><i class="fas fa-download"></i> تحميل</button>
+        </div>`;
+    }
+
+    function openDetails(id) {
+      currentBook = booksData.find(b => b.id === id);
+      if (!currentBook) return;
+      const content = document.getElementById('detailsModalContent');
+      if (currentBook.comingSoon) {
+        content.classList.add('premium-modal-content');
+        content.innerHTML = `
+          <button class="close-modal" onclick="closeDetails()"><i class="fas fa-times"></i></button>
+          <div class="premium-crown">👑</div>
+          <h2 class="premium-title">${currentBook.title}</h2>
+          <div class="premium-soon">🚀 قريباً جداً — Premium 🚀</div>
+          <p class="premium-desc">
+            هذه النوطة <b style="color: var(--neon-pink);">مميزة وحصرية</b>.<br>
+            ستكون متاحة قريباً كخدمة <b style="color: #FFD700;">مدفوعة</b>.<br>
+            ترقبوا التحديث القادم!
+          </p>
+          <div style="display: flex; gap: 10px;">
+            <a href="https://wa.me/306992229656" target="_blank" class="contact-action-btn btn-whatsapp" style="flex: 1; padding: 12px;">
+              <i class="fab fa-whatsapp"></i> استفسار
+            </a>
+          </div>`;
+      } else {
+        content.classList.remove('premium-modal-content');
+        content.innerHTML = getDefaultDetailsHTML();
+        document.getElementById('modalImg').src = currentBook.img;
+        document.getElementById('modalTitle').textContent = currentBook.title;
+        document.getElementById('modalDesc').textContent = 'ملف رقمي جاهز للتحميل والقراءة بصيغة PDF.';
+        document.getElementById('modalType').textContent = 'التصنيف: ' + currentBook.type;
+      }
+      document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function closeDetails() {
+      document.getElementById('detailsModal').classList.remove('active');
+      setTimeout(() => {
+        const content = document.getElementById('detailsModalContent');
+        if (content.classList.contains('premium-modal-content')) {
+          content.classList.remove('premium-modal-content');
+          content.innerHTML = getDefaultDetailsHTML();
+        }
+      }, 400);
+    }
+
+    function readCurrentFile() {
+      if (!currentBook || !currentBook.file) return;
+      document.getElementById('pdfTitle').textContent = currentBook.title;
+      document.getElementById('pdfFrame').src = encodeURI(currentBook.file);
+      document.getElementById('pdfModal').classList.add('active');
+    }
+
+    function closePdf() {
+      document.getElementById('pdfModal').classList.remove('active');
+      document.getElementById('pdfFrame').src = '';
+    }
+
+    function addCurrentToCart() {
+      if (!currentBook || !currentBook.file) return;
+      if (!cart.some(item => item.id === currentBook.id)) {
+        cart.push(currentBook);
+        updateCartUI();
+        const badge = document.getElementById('cartBadge');
+        badge.style.transform = 'scale(1.5)';
+        setTimeout(() => badge.style.transform = 'scale(1)', 200);
+      }
+      closeDetails();
+      toggleSidebar(true);
+    }
+
+    function updateCartUI() {
+      const cartItems = document.getElementById('cartItems');
+      const badge = document.getElementById('cartBadge');
+      if (cart.length === 0) {
+        cartItems.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 20px;">السلة فارغة</p>';
+        badge.classList.remove('show');
+      } else {
+        badge.textContent = cart.length;
+        badge.classList.add('show');
+        cartItems.innerHTML = cart.map(item => `
+          <div style="background: var(--surface); padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.85rem; font-weight: bold; color: var(--text-main);">${item.title}</span>
+            <button onclick="removeFromCart(${item.id})" style="background: none; border: none; color: var(--neon-pink); cursor: pointer;"><i class="fas fa-trash"></i></button>
+          </div>`).join('');
+      }
+    }
+
+    function removeFromCart(id) { cart = cart.filter(item => item.id !== id); updateCartUI(); }
+
+    function toggleSidebar(open) {
+      document.getElementById('cartSidebar').classList.toggle('active', open);
+      document.getElementById('sidebarOverlay').classList.toggle('active', open);
+    }
+
+    function downloadAll() {
+      if (cart.length === 0) return;
+      cart.forEach((item, index) => {
+        if (!item.file) return;
+        setTimeout(() => {
+          const link = document.createElement('a');
+          link.href = encodeURI(item.file);
+          link.download = item.title + '.pdf';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }, index * 1000);
+      });
+      cart = [];
+      updateCartUI();
+      toggleSidebar(false);
+    }
+
+    function filterCategory(cat, btn) {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filtered = cat === 'all' ? booksData : booksData.filter(b => b.cat === cat);
+      document.getElementById('dynamicSections').innerHTML = `
+        <h2 class="section-title">نتائج التصنيف (${filtered.length})</h2>
+        <div class="horizontal-scroll" style="flex-wrap: wrap; overflow-x: hidden;">
+          ${filtered.map(createCard).join('')}
+        </div>`;
+    }
+
+    document.getElementById('desktopSearch').addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      const filtered = booksData.filter(b => b.title.toLowerCase().includes(term));
+      const sectionsContainer = document.getElementById('dynamicSections');
+      if (term === '') { initHome(); return; }
+      sectionsContainer.innerHTML = `
+        <h2 class="section-title">نتائج البحث (${filtered.length})</h2>
+        <div class="horizontal-scroll" style="flex-wrap: wrap; overflow-x: hidden;">
+          ${filtered.length > 0 ? filtered.map(createCard).join('') : '<p style="color: var(--text-muted);">لا توجد نتائج مطابقة</p>'}
+        </div>`;
+    });
+
+    function toggleMobileSearch() {
+      document.getElementById('mobileSearchOverlay').classList.toggle('active');
+      if (document.getElementById('mobileSearchOverlay').classList.contains('active')) document.getElementById('mobileSearchInput').focus();
+    }
+
+    function handleMobileSearch(term) {
+      const filtered = booksData.filter(b => b.title.toLowerCase().includes(term.toLowerCase()));
+      const results = document.getElementById('mobileSearchResults');
+      if (term === '') { results.innerHTML = ''; return; }
+      results.innerHTML = filtered.map(b => `
+        <div style="padding: 10px; border-bottom: 1px solid var(--glass-border); cursor: pointer;" onclick="openDetails(${b.id}); toggleMobileSearch();">
+          <div style="font-weight: bold; color: var(--text-main);">${b.title}</div>
+          <div style="font-size: 0.75rem; color: var(--neon-cyan);">${b.type}</div>
+        </div>`).join('');
+    }
+
+    function getToolSource(sourceId) {
+      const el = document.getElementById(sourceId);
+      return el ? el.textContent : '';
+    }
+
+    function downloadTool(toolId) {
+      const tool = toolsData.find(t => t.id === toolId);
+      if (!tool) return;
+      const source = getToolSource(tool.sourceId).trim();
+      if (!source || source.length < 500) {
+        alert('⚠️ كود الأداة غير موجود!');
+        return;
+      }
+      const blob = new Blob([source], { type: 'text/x-python;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = tool.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function viewToolCode(toolId) {
+      const tool = toolsData.find(t => t.id === toolId);
+      if (!tool) return;
+      const source = getToolSource(tool.sourceId).trim();
+      if (!source || source.length < 500) { alert('⚠️ كود الأداة غير موجود!'); return; }
+      const w = window.open('', '_blank');
+      if (w) {
+        w.document.write('<html dir="ltr"><head><title>' + tool.title + '</title><style>body{background:#1e1e1e;color:#d4d4d4;font-family:monospace;padding:20px;font-size:13px;line-height:1.5;}pre{white-space:pre-wrap;word-wrap:break-word;}h1{color:#00f0ff;border-bottom:2px solid #00f0ff;padding-bottom:10px;}</style></head><body><h1>' + tool.title + '</h1><pre>' + source.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre></body></html>');
+        w.document.close();
+      }
+    }
+
+    function switchTab(tab, el) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      el.classList.add('active');
+      const container = document.getElementById('dynamicSections');
+      if (tab === 'home') { initHome(); }
+      else if (tab === 'favorites') {
+        const favs = booksData.filter(b => favorites.includes(b.id));
+        container.innerHTML = `
+          <h2 class="section-title">الملفات المفضلة (${favs.length})</h2>
+          <div class="horizontal-scroll" style="flex-wrap: wrap; overflow-x: hidden;">
+            ${favs.length > 0 ? favs.map(createCard).join('') : '<p style="color: var(--text-muted);">لم تقم بإضافة ملفات للمفضلة بعد.</p>'}
+          </div>`;
+      }
+      else if (tab === 'python') {
+        container.innerHTML = `
+          <h2 class="section-title">أدوات بايثون للأمن السيبراني</h2>
+          <div class="horizontal-scroll" style="flex-wrap: wrap; overflow-x: hidden;">
+            ${toolsData.map(createToolCard).join('')}
+          </div>
+          ${toolsData.map(tool => `
+            <h2 class="section-title" style="margin-top: 30px;">${tool.title}</h2>
+            <div class="info-card" style="text-align: right;">
+              <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
+                <div class="tool-icon-wrap" style="width: 80px; height: 80px; margin: 0;"><i class="${tool.icon}"></i></div>
+                <div style="flex: 1;">
+                  <h3 style="margin-bottom: 5px; text-align: right;">${tool.title}</h3>
+                  <p style="margin: 0; font-size: 0.85rem;">${tool.desc}</p>
+                </div>
+              </div>
+              <div class="action-grid" style="max-width: 500px;">
+                <button class="action-btn btn-read" onclick="viewToolCode('${tool.id}')"><i class="fas fa-code"></i> عرض الكود</button>
+                <button class="action-btn btn-download" onclick="downloadTool('${tool.id}')"><i class="fas fa-download"></i> تحميل الأداة</button>
+              </div>
+              <div style="margin-top: 15px; padding: 12px; background: rgba(255,0,127,0.1); border-radius: 12px; border: 1px solid rgba(255,0,127,0.3);">
+                <p style="color: var(--neon-pink); font-size: 0.8rem; margin: 0; text-align: right;">
+                  ⚠️ <b>تحذير:</b> استخدم الأداة فقط على الشبكات التي تملكها أو لديك إذن كتابي بها.
+                </p>
+              </div>
+            </div>`).join('')}`;
+      }
+      else if (tab === 'settings') {
+        const isLight = document.body.getAttribute('data-theme') === 'light';
+        container.innerHTML = `
+          <h2 class="section-title">الإعدادات</h2>
+          <div class="info-card" style="display: flex; justify-content: space-between; align-items: center; text-align: right;">
+            <div>
+              <h3 style="margin-bottom: 5px;">مظهر الموقع</h3>
+              <p style="margin-bottom: 0; font-size: 0.8rem;">تبديل بين الوضع الداكن والفاتح</p>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()"><i class="fas fa-${isLight ? 'sun' : 'moon'}"></i> ${isLight ? 'فاتح' : 'داكن'}</button>
+          </div>`;
+      }
+      else if (tab === 'contact') {
+        container.innerHTML = `
+          <h2 class="section-title">اتصل بنا</h2>
+          <div class="info-card">
+            <i class="fas fa-headset main-icon"></i>
+            <h3>نحن هنا لمساعدتك</h3>
+            <p>لأي استفسارات أو اقتراحات، لا تتردد في التواصل معنا مباشرة عبر القنوات التالية:</p>
+            <div class="contact-grid">
+              <a href="https://wa.me/306992229656" target="_blank" class="contact-action-btn btn-whatsapp"><i class="fab fa-whatsapp"></i> مراسلة عبر واتساب</a>
+              <a href="mailto:abdullahetek0@gmail.com" target="_blank" class="contact-action-btn btn-email"><i class="fas fa-envelope"></i> مراسلة عبر البريد الإلكتروني</a>
+            </div>
+          </div>`;
+      }
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      if (body.getAttribute('data-theme') === 'light') { body.removeAttribute('data-theme'); localStorage.setItem('theme', 'dark'); }
+      else { body.setAttribute('data-theme', 'light'); localStorage.setItem('theme', 'light'); }
+      switchTab('settings', document.querySelectorAll('.nav-item')[3]);
+    }
+
+    initHome();
+    updateCartUI();
+  </script>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Network Scanner V4 — Python Source Code (embedded)
+       ═══════════════════════════════════════════════════════════════ -->
+  <script type="text/plain" id="scanner-source">
+# scanner.py
+# Network Scanner Pro ULTIMATE V4 (Router Integration + Keyboard)
+
+import pygame
+import sys
+import os
+import socket
+import subprocess
+import threading
+import time
+import math
+import random
+import re
+import json
+import struct
+import csv
+import urllib.request
+import urllib.error
+import base64
+from datetime import datetime
+
+FPS_TARGET = 60
+SAVE_FILE = "scanner_data.json"
+HISTORY_FILE = "scanner_history.json"
+BACKUP_FILE = "scanner_backup.json"
+
+THEMES = {
+    "dark": {
+        "bg": (5, 8, 18), "grid": (15, 30, 50),
+        "cyan": (0, 255, 255), "blue": (80, 180, 255),
+        "purple": (180, 100, 255), "green": (50, 255, 130),
+        "yellow": (255, 230, 80), "red": (255, 70, 90),
+        "text": (200, 240, 255), "text_dim": (100, 140, 170),
+        "btn_bg": (10, 20, 40), "panel": (8, 15, 30),
+    },
+    "light": {
+        "bg": (240, 245, 255), "grid": (210, 220, 240),
+        "cyan": (0, 150, 200), "blue": (30, 100, 200),
+        "purple": (120, 40, 180), "green": (20, 160, 80),
+        "yellow": (200, 150, 0), "red": (200, 40, 60),
+        "text": (20, 30, 50), "text_dim": (100, 110, 130),
+        "btn_bg": (220, 230, 245), "panel": (250, 252, 255),
+    },
+}
+
+THEME = "dark"
+def C(key): return THEMES[THEME][key]
+
+OUI_DB = {
+    "00:50:56": "VMware", "00:0C:29": "VMware", "00:03:FF": "Microsoft",
+    "08:00:27": "VirtualBox", "00:1A:11": "Google", "3C:5A:B4": "Google",
+    "F4:F5:D8": "Google", "94:EB:2C": "Google", "00:1B:63": "Apple",
+    "00:1E:C2": "Apple", "00:23:DF": "Apple", "28:CF:E9": "Apple",
+    "3C:07:54": "Apple", "40:6C:8F": "Apple", "60:33:4B": "Apple",
+    "68:A8:6D": "Apple", "70:56:81": "Apple", "78:31:C1": "Apple",
+    "8C:85:90": "Apple", "9C:F3:87": "Apple", "A4:83:E7": "Apple",
+    "B8:17:C2": "Apple", "D0:81:7A": "Apple", "DC:A9:04": "Apple",
+    "F0:18:98": "Apple", "F4:5C:89": "Apple", "00:1D:BA": "Sony",
+    "00:24:BE": "Sony", "30:F9:ED": "Sony", "00:1F:E1": "Samsung",
+    "00:23:39": "Samsung", "00:26:37": "Samsung", "08:37:3D": "Samsung",
+    "28:39:5E": "Samsung", "38:AA:3C": "Samsung", "8C:77:12": "Samsung",
+    "AC:5F:3E": "Samsung", "B4:79:A7": "Samsung", "C8:19:F7": "Samsung",
+    "D0:22:BE": "Samsung", "E8:50:8B": "Samsung", "F4:0E:22": "Samsung",
+    "00:1E:64": "Intel", "00:1F:3B": "Intel", "34:13:E8": "Intel",
+    "48:51:B7": "Intel", "7C:5C:F8": "Intel", "A0:88:B4": "Intel",
+    "00:1C:B3": "Xiaomi", "04:CF:8C": "Xiaomi", "0C:1D:AF": "Xiaomi",
+    "10:2A:B3": "Xiaomi", "14:F6:5A": "Xiaomi", "18:59:36": "Xiaomi",
+    "28:6C:07": "Xiaomi", "34:CE:00": "Xiaomi", "3C:BD:3E": "Xiaomi",
+    "44:23:7C": "Xiaomi", "50:8F:4C": "Xiaomi", "58:44:98": "Xiaomi",
+    "64:09:80": "Xiaomi", "64:B4:73": "Xiaomi", "68:AB:BC": "Xiaomi",
+    "74:23:44": "Xiaomi", "78:11:DC": "Xiaomi", "7C:1D:D9": "Xiaomi",
+    "8C:BE:BE": "Xiaomi", "98:FA:E3": "Xiaomi", "9C:99:A0": "Xiaomi",
+    "A4:DA:22": "Xiaomi", "AC:C1:EE": "Xiaomi", "B0:E2:35": "Xiaomi",
+    "C4:0B:CB": "Xiaomi", "CC:2D:1B": "Xiaomi", "D4:97:0B": "Xiaomi",
+    "F0:B4:29": "Xiaomi", "F4:8B:32": "Xiaomi", "F8:A4:5F": "Xiaomi",
+    "00:14:D1": "TP-Link", "00:19:E0": "TP-Link", "00:1D:0F": "TP-Link",
+    "00:21:27": "TP-Link", "00:23:CD": "TP-Link", "04:8D:38": "TP-Link",
+    "08:57:00": "TP-Link", "0C:80:63": "TP-Link", "10:27:F5": "TP-Link",
+    "14:CC:20": "TP-Link", "18:A6:F7": "TP-Link", "1C:3B:F3": "TP-Link",
+    "28:2C:B2": "TP-Link", "30:B5:C2": "TP-Link", "34:60:F9": "TP-Link",
+    "3C:46:D8": "TP-Link", "40:16:9F": "TP-Link", "48:0E:EC": "TP-Link",
+    "50:64:2B": "TP-Link", "5C:63:BF": "TP-Link", "60:32:B1": "TP-Link",
+    "64:56:01": "TP-Link", "68:FF:7B": "TP-Link", "70:4F:57": "TP-Link",
+    "74:DA:88": "TP-Link", "78:A1:06": "TP-Link", "7C:8B:CA": "TP-Link",
+    "84:16:F9": "TP-Link", "88:25:93": "TP-Link", "8C:21:0A": "TP-Link",
+    "90:F6:52": "TP-Link", "94:0C:6D": "TP-Link", "98:DA:C4": "TP-Link",
+    "A0:F3:C1": "TP-Link", "A4:2B:B0": "TP-Link", "A8:57:4E": "TP-Link",
+    "AC:84:C6": "TP-Link", "B0:48:7A": "TP-Link", "B0:BE:76": "TP-Link",
+    "C0:25:E9": "TP-Link", "C4:6E:1F": "TP-Link", "C4:E9:84": "TP-Link",
+    "D0:76:E7": "TP-Link", "D4:6E:0E": "TP-Link", "E4:C3:2A": "TP-Link",
+    "E8:94:F6": "TP-Link", "EC:08:6B": "TP-Link", "F4:28:53": "TP-Link",
+    "F8:1A:67": "TP-Link", "F8:D1:11": "TP-Link", "FC:7C:02": "TP-Link",
+    "00:0C:41": "Linksys", "00:13:10": "Linksys", "00:14:BF": "Linksys",
+    "00:18:39": "Linksys", "00:1A:70": "Linksys", "00:1C:10": "Linksys",
+    "00:1D:7E": "Linksys", "00:1E:E5": "Linksys", "20:AA:4B": "Linksys",
+    "48:F8:B3": "Linksys", "C0:C1:C0": "Linksys", "00:24:01": "D-Link",
+    "00:26:5A": "D-Link", "14:D6:4D": "D-Link", "1C:7E:E5": "D-Link",
+    "28:10:7B": "D-Link", "34:08:04": "D-Link", "3C:1E:04": "D-Link",
+    "40:9B:CD": "D-Link", "5C:D9:98": "D-Link", "78:54:2E": "D-Link",
+    "84:C9:B2": "D-Link", "90:94:E4": "D-Link", "00:0F:B5": "Netgear",
+    "00:14:6C": "Netgear", "00:18:4D": "Netgear", "00:1B:2F": "Netgear",
+    "00:1E:2A": "Netgear", "00:1F:33": "Netgear", "00:22:3F": "Netgear",
+    "20:4E:7F": "Netgear", "28:C6:8E": "Netgear", "2C:30:33": "Netgear",
+    "A4:5E:60": "Huawei", "00:E0:4C": "Realtek", "00:1F:1F": "Edimax",
+    "00:1A:2B": "Asus", "00:1B:FC": "Asus", "00:1E:8C": "Asus",
+    "00:22:15": "Asus", "00:24:8C": "Asus", "00:26:18": "Asus",
+    "04:D4:C4": "Asus", "08:60:6E": "Asus", "10:BF:48": "Asus",
+    "1C:87:2C": "Asus", "2C:56:DC": "Asus", "30:5A:3A": "Asus",
+    "38:2C:4A": "Asus", "40:16:7E": "Asus", "48:5B:39": "Asus",
+    "50:46:5D": "Asus", "54:04:A6": "Asus", "60:45:CB": "Asus",
+    "70:4D:7B": "Asus", "74:D0:2B": "Asus", "78:24:AF": "Asus",
+    "88:D7:F6": "Asus", "9C:5C:8E": "Asus", "AC:22:0B": "Asus",
+    "AC:9E:17": "Asus", "B0:6E:BF": "Asus", "BC:AE:C5": "Asus",
+    "BC:EE:7B": "Asus", "C8:60:00": "Asus", "D0:17:C2": "Asus",
+    "D8:50:E6": "Asus", "E0:3F:49": "Asus", "E0:CB:4E": "Asus",
+    "F4:6D:04": "Asus", "F8:32:E4": "Asus", "FC:C2:DE": "Asus",
+    "B8:27:EB": "Raspberry Pi", "DC:A6:32": "Raspberry Pi",
+    "E4:5F:01": "Raspberry Pi", "28:CD:C1": "Raspberry Pi",
+    "00:40:8C": "Axis Camera", "00:80:F0": "Panasonic",
+    "00:0E:58": "Sonos", "5C:AA:FD": "Sonos", "78:28:CA": "Sonos",
+    "B8:E9:37": "Sonos", "00:17:88": "Philips Hue", "EC:B5:FA": "Philips Hue",
+    "00:22:6B": "Cisco-Linksys", "00:1A:A1": "Cisco", "00:1B:54": "Cisco",
+    "00:1C:57": "Cisco", "00:1D:45": "Cisco", "00:1E:13": "Cisco",
+    "00:1F:6C": "Cisco", "00:21:55": "Cisco", "00:22:90": "Cisco",
+    "00:23:5E": "Cisco", "00:24:97": "Cisco", "00:25:45": "Cisco",
+    "00:26:0B": "Cisco", "00:40:96": "Cisco", "00:50:0F": "Cisco",
+    "00:90:0B": "Cisco", "00:90:21": "Cisco", "00:90:2B": "Cisco",
+    "F0:9F:C2": "Ubiquiti", "24:A4:3C": "Ubiquiti", "44:D9:E7": "Ubiquiti",
+    "68:D7:9A": "Ubiquiti", "74:83:C2": "Ubiquiti", "78:8A:20": "Ubiquiti",
+    "80:2A:A8": "Ubiquiti", "B4:FB:E4": "Ubiquiti", "DC:9F:DB": "Ubiquiti",
+    "E0:63:DA": "Ubiquiti", "F4:92:BF": "Ubiquiti", "FC:EC:DA": "Ubiquiti",
+    "00:1A:2A": "HP", "00:1B:78": "HP", "00:1E:0B": "HP", "00:21:5A": "HP",
+    "00:22:64": "HP", "00:23:7D": "HP", "00:24:81": "HP", "00:25:B3": "HP",
+    "00:26:55": "HP", "2C:27:D7": "HP", "3C:D9:2B": "HP", "40:A8:F0": "HP",
+    "6C:C2:17": "HP", "94:57:A5": "HP", "98:4B:E1": "HP", "A0:48:1C": "HP",
+    "A0:D3:C1": "HP", "B0:5A:DA": "HP", "D0:BF:9C": "HP", "D4:85:64": "HP",
+    "E4:11:5B": "HP", "F4:CE:46": "HP", "00:15:C5": "Dell", "00:1A:A0": "Dell",
+    "00:1C:23": "Dell", "00:1D:09": "Dell", "00:1E:4F": "Dell",
+    "00:21:70": "Dell", "00:21:9B": "Dell", "00:22:19": "Dell",
+    "00:23:AE": "Dell", "00:24:E8": "Dell", "00:25:64": "Dell",
+    "00:26:B9": "Dell", "14:18:77": "Dell", "14:B3:1F": "Dell",
+    "18:03:73": "Dell", "18:A9:9B": "Dell", "18:DB:F2": "Dell",
+    "18:FB:7B": "Dell", "1C:72:1D": "Dell", "20:47:47": "Dell",
+    "24:6E:96": "Dell", "28:F1:0E": "Dell", "2C:EA:7F": "Dell",
+    "34:17:EB": "Dell", "44:A8:42": "Dell", "4C:76:25": "Dell",
+    "50:9A:4C": "Dell", "54:48:10": "Dell", "5C:26:0A": "Dell",
+    "5C:F9:DD": "Dell", "60:36:DD": "Dell", "6C:2B:59": "Dell",
+    "74:86:7A": "Dell", "74:E6:E2": "Dell", "78:2B:CB": "Dell",
+    "78:45:C4": "Dell", "7C:D3:0A": "Dell", "80:18:44": "Dell",
+    "84:2B:2B": "Dell", "84:7B:EB": "Dell", "84:8F:69": "Dell",
+    "90:B1:1C": "Dell", "98:40:BB": "Dell", "98:90:96": "Dell",
+    "A4:1F:72": "Dell", "A4:BA:DB": "Dell", "B0:83:FE": "Dell",
+    "B8:2A:72": "Dell", "B8:AC:6F": "Dell", "B8:CA:3A": "Dell",
+    "BC:30:5B": "Dell", "C8:1F:66": "Dell", "D0:43:1E": "Dell",
+    "D0:67:E5": "Dell", "D4:81:D7": "Dell", "D4:AE:52": "Dell",
+    "D4:BE:D9": "Dell", "D8:9E:F3": "Dell", "E0:DB:55": "Dell",
+    "E4:F0:04": "Dell", "EC:F4:BB": "Dell", "F0:4D:A2": "Dell",
+    "F0:92:1C": "Dell", "F8:B1:56": "Dell", "F8:BC:12": "Dell",
+    "F8:DB:88": "Dell", "00:0D:3A": "Microsoft", "00:12:5A": "Microsoft",
+    "00:15:5D": "Microsoft", "28:18:78": "Microsoft",
+    "58:82:A8": "Microsoft", "7C:1E:52": "Microsoft",
+    "00:04:4B": "NVIDIA", "00:0D:0B": "Buffalo",
+}
+
+PORT_SERVICES = {
+    21: "FTP", 22: "SSH", 23: "Telnet", 25: "SMTP", 53: "DNS",
+    80: "HTTP", 110: "POP3", 123: "NTP", 135: "MSRPC", 137: "NetBIOS",
+    138: "NetBIOS", 139: "NetBIOS", 143: "IMAP", 161: "SNMP",
+    162: "SNMP-Trap", 389: "LDAP", 443: "HTTPS", 445: "SMB",
+    465: "SMTPS", 514: "Syslog", 515: "LPD", 548: "AFP", 554: "RTSP",
+    587: "SMTP-Submission", 631: "IPP", 636: "LDAPS", 873: "Rsync",
+    902: "VMware", 989: "FTPS", 990: "FTPS", 993: "IMAPS",
+    995: "POP3S", 1080: "SOCKS", 1194: "OpenVPN", 1433: "MSSQL",
+    1434: "MSSQL", 1521: "Oracle", 1723: "PPTP", 1883: "MQTT",
+    1900: "SSDP/UPnP", 2049: "NFS", 2082: "cPanel", 2083: "cPanel-SSL",
+    2181: "Zookeeper", 2222: "SSH-Alt", 2375: "Docker",
+    3000: "Node/Dev", 3128: "Squid-Proxy", 3260: "iSCSI",
+    3306: "MySQL", 3389: "RDP", 3478: "STUN", 4443: "HTTPS-Alt",
+    5000: "UPnP/Dev", 5060: "SIP", 5061: "SIP-TLS", 5222: "XMPP",
+    5269: "XMPP-S2S", 5353: "mDNS", 5432: "PostgreSQL",
+    5555: "ADB/Android", 5601: "Kibana", 5672: "RabbitMQ",
+    5683: "CoAP", 5900: "VNC", 5984: "CouchDB", 6000: "X11",
+    6379: "Redis", 6443: "Kubernetes", 7000: "AirPlay",
+    8000: "HTTP-Alt", 8008: "HTTP-Alt", 8080: "HTTP-Proxy",
+    8081: "HTTP-Alt", 8086: "InfluxDB", 8088: "HTTP-Alt",
+    8090: "HTTP-Alt", 8123: "HomeAssistant", 8443: "HTTPS-Alt",
+    8883: "MQTT-TLS", 8888: "HTTP-Alt", 9000: "Dev",
+    9042: "Cassandra", 9090: "Web-Admin", 9092: "Kafka",
+    9100: "Printer-JetDirect", 9200: "Elasticsearch",
+    9300: "Elasticsearch", 9418: "Git", 9999: "Dev",
+    10000: "Webmin", 11211: "Memcached", 15672: "RabbitMQ-Admin",
+    27017: "MongoDB", 27018: "MongoDB", 50000: "SAP",
+    61616: "ActiveMQ", 62078: "iOS-Sync",
+}
+
+DANGEROUS_PORTS = {
+    23: "Telnet (insecure!)", 21: "FTP (plaintext)",
+    135: "MSRPC", 137: "NetBIOS", 138: "NetBIOS", 139: "NetBIOS",
+    445: "SMB (ransomware)", 1433: "MSSQL exposed",
+    3306: "MySQL exposed", 3389: "RDP exposed",
+    5432: "PostgreSQL exposed", 5900: "VNC exposed",
+    6379: "Redis exposed", 27017: "MongoDB exposed",
+    11211: "Memcached exposed", 5555: "Android ADB exposed",
+}
+
+def lookup_vendor(mac):
+    if not mac or mac == "??:??:??:??:??:??": return "Unknown"
+    return OUI_DB.get(mac[:8].upper(), "Unknown")
+
+def lookup_service(port):
+    return PORT_SERVICES.get(port, f"Port-{port}")
+
+def load_json(path, default):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return default
+
+def save_json(path, data):
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+def load_user_data():
+    d = load_json(SAVE_FILE, {})
+    d.setdefault("known_devices", {})
+    d.setdefault("theme", "dark")
+    d.setdefault("auto_scan", False)
+    d.setdefault("sound", True)
+    d.setdefault("ghost_mode", False)
+    d.setdefault("router_user", "admin")
+    d.setdefault("router_pass", "")
+    d.setdefault("router_devices", {})
+    return d
+
+def save_user_data(data): save_json(SAVE_FILE, data)
+def load_history(): return load_json(HISTORY_FILE, [])
+def save_history(data): save_json(HISTORY_FILE, data[-500:])
+
+# ============ Router Integration ============
+def fetch_router_devices(router_ip, username, password, timeout=5):
+    if not router_ip:
+        return []
+    devices = []
+    try:
+        auth_bytes = f"{username}:{password}".encode()
+        auth = base64.b64encode(auth_bytes).decode()
+        endpoints = [
+            f"http://{router_ip}/userRpm/AssignedIpAddrListRpm.htm",
+            f"http://{router_ip}/cgi-bin/luci/;stok=/locale?form=dhcp_leases",
+            f"http://{router_ip}/DHCPClientInfo.htm",
+            f"http://{router_ip}/dhcp_clients.html",
+        ]
+        for url in endpoints:
+            try:
+                req = urllib.request.Request(url)
+                req.add_header("Authorization", f"Basic {auth}")
+                req.add_header("User-Agent", "Mozilla/5.0")
+                with urllib.request.urlopen(req, timeout=timeout) as resp:
+                    html = resp.read().decode("utf-8", errors="ignore")
+                    ips = re.findall(r'\b(?:192\.168|10\.0|172\.(?:1[6-9]|2\d|3[01]))\.\d+\.\d+\b', html)
+                    macs = re.findall(r'\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b', html)
+                    if ips and macs:
+                        for i, ip in enumerate(set(ips)):
+                            mac = macs[i].upper().replace("-", ":") if i < len(macs) else "??:??:??:??:??:??"
+                            devices.append({"ip": ip, "mac": mac})
+                        if devices:
+                            break
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return devices
+
+try:
+    import array
+except Exception:
+    array = None
+
+class SoundBank:
+    def __init__(self):
+        self.ok = False
+        try:
+            pygame.mixer.pre_init(22050, -16, 1, 512)
+            pygame.mixer.init()
+            self.ok = True
+        except Exception:
+            self.ok = False
+            return
+        self.alert = self._tone(880, 0.2, 0.5)
+        self.beep = self._tone(1200, 0.08, 0.3)
+        self.success = self._tone(660, 0.15, 0.4)
+    def _tone(self, freq, dur, vol):
+        try:
+            sr = 22050
+            n = int(sr * dur)
+            buf = array.array('h')
+            for i in range(n):
+                t = i / sr
+                env = max(0.0, 1.0 - (i / n))
+                v = int(32767 * vol * env * math.sin(2 * math.pi * freq * t))
+                buf.append(v)
+            return pygame.mixer.Sound(buffer=buf.tobytes())
+        except Exception:
+            return None
+    def play(self, name):
+        if not self.ok: return
+        s = getattr(self, name, None)
+        if s: s.play()
+
+# ============ OS Fingerprint ============
+def get_ttl(ip):
+    try:
+        r = subprocess.run(["ping", "-c", "1", "-W", "1", ip],
+                           stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                           timeout=3)
+        if r.returncode != 0: return None
+        out = r.stdout.decode("utf-8", errors="ignore")
+        m = re.search(r"ttl=(\d+)", out, re.IGNORECASE)
+        if m: return int(m.group(1))
+        return None
+    except Exception:
+        return None
+
+def ttl_to_os(ttl):
+    if ttl is None: return "Unknown"
+    if ttl <= 32: return "Embedded/Printer"
+    if ttl <= 64:
+        if ttl >= 60: return "Linux/Android"
+        return "Linux/Embedded"
+    if ttl <= 128: return "Windows"
+    if ttl <= 255:
+        if ttl >= 250: return "Cisco/Router"
+        return "Router/Network"
+    return "Unknown"
+
+def detect_device_type(mac, hostname, ports, ttl):
+    h = (hostname or "").lower()
+    vendor = lookup_vendor(mac).lower()
+    if any(x in h for x in ["iphone", "ipad"]): return "iPhone/iPad"
+    if "android" in h: return "Android Phone"
+    if any(x in h for x in ["macbook", "imac", "mac-"]): return "Mac"
+    if any(x in h for x in ["desktop", "laptop", "pc-", "win-"]): return "Windows PC"
+    if "router" in h or "gateway" in h: return "Router"
+    if "printer" in h: return "Printer"
+    if "tv" in h or "bravia" in h or "smarttv" in h: return "Smart TV"
+    if "ps4" in h or "ps5" in h or "playstation" in h: return "PlayStation"
+    if "xbox" in h: return "Xbox"
+    if "chromecast" in h or "googlehome" in h: return "Chromecast"
+    if "echo" in h or "alexa" in h: return "Alexa"
+    if "raspberry" in h: return "Raspberry Pi"
+    if "camera" in h or "cam-" in h or "ipcam" in h: return "IP Camera"
+    port_set = set(ports)
+    if 9100 in port_set or 631 in port_set or 515 in port_set: return "Printer"
+    if 554 in port_set and (8000 in port_set or 8554 in port_set): return "IP Camera"
+    if 3389 in port_set: return "Windows PC"
+    if 22 in port_set and 548 in port_set: return "Mac"
+    if 22 in port_set and 445 not in port_set and 3389 not in port_set: return "Linux/Unix"
+    if 445 in port_set or 139 in port_set: return "Windows PC"
+    if 62078 in port_set: return "iOS Device"
+    if 5555 in port_set: return "Android Phone"
+    if "apple" in vendor:
+        if "iphone" in h: return "iPhone"
+        if "ipad" in h: return "iPad"
+        return "Apple Device"
+    if "samsung" in vendor: return "Samsung Device"
+    if "xiaomi" in vendor: return "Xiaomi Device"
+    if "google" in vendor: return "Google Device"
+    if "sonos" in vendor: return "Sonos Speaker"
+    if "raspberry" in vendor: return "Raspberry Pi"
+    if "sony" in vendor: return "Sony Device"
+    if any(x in vendor for x in ["tp-link", "netgear", "d-link", "linksys",
+                                   "asus", "belkin", "ubiquiti", "cisco"]):
+        return "Network Device"
+    if "intel" in vendor: return "PC/Laptop (Intel)"
+    if any(x in vendor for x in ["dell", "hp", "microsoft"]): return "PC/Laptop"
+    if ttl:
+        if 60 <= ttl <= 64: return "Linux/Android"
+        if 120 <= ttl <= 128: return "Windows"
+        if ttl >= 250: return "Router/Switch"
+        if ttl <= 32: return "Embedded Device"
+    return "Unknown Device"
+
+def ssdp_discover(timeout=2):
+    devices = {}
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(timeout)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        msg = ('M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\n'
+               'MAN: "ssdp:discover"\r\nMX: 2\r\nST: ssdp:all\r\n\r\n').encode()
+        sock.sendto(msg, ("239.255.255.250", 1900))
+        start = time.time()
+        while time.time() - start < timeout:
+            try:
+                data, addr = sock.recvfrom(4096)
+                ip = addr[0]
+                text = data.decode("utf-8", errors="ignore")
+                server, st = "", ""
+                for line in text.split("\r\n"):
+                    if line.lower().startswith("server:"): server = line.split(":", 1)[1].strip()
+                    if line.lower().startswith("st:"): st = line.split(":", 1)[1].strip()
+                if ip not in devices:
+                    devices[ip] = {"server": server[:60], "st": st[:60]}
+            except socket.timeout:
+                break
+            except Exception:
+                continue
+        sock.close()
+    except Exception:
+        pass
+    return devices
+
+def mdns_discover(timeout=2):
+    devices = {}
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(timeout)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        query = struct.pack("!HHHHHH", 0, 0, 1, 0, 0, 0)
+        for part in ["_services", "_dns-sd", "_udp", "local"]:
+            query += bytes([len(part)]) + part.encode()
+        query += b"\x00"
+        query += struct.pack("!HH", 12, 1)
+        sock.sendto(query, ("224.0.0.251", 5353))
+        start = time.time()
+        while time.time() - start < timeout:
+            try:
+                data, addr = sock.recvfrom(4096)
+                devices[addr[0]] = {"size": len(data)}
+            except socket.timeout:
+                break
+            except Exception:
+                continue
+        sock.close()
+    except Exception:
+        pass
+    return devices
+
+def netbios_query(ip, timeout=1):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(timeout)
+        tid = random.randint(0, 65535)
+        packet = struct.pack("!HHHHHH", tid, 0x0000, 1, 0, 0, 0)
+        packet += bytes([32]) + b"CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" + b"\x00"
+        packet += struct.pack("!HH", 0x21, 0x0001)
+        sock.sendto(packet, (ip, 137))
+        try:
+            data, _ = sock.recvfrom(1024)
+            if len(data) > 56:
+                num_names = data[56]
+                if num_names > 0:
+                    name_bytes = data[57:57+15]
+                    try:
+                        name = name_bytes.decode("ascii", errors="ignore").strip()
+                        if name: return name
+                    except Exception:
+                        pass
+        except socket.timeout:
+            pass
+        sock.close()
+    except Exception:
+        pass
+    return None
+
+def http_grab(ip, port=80, timeout=1.5):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        sock.connect((ip, port))
+        req = f"HEAD / HTTP/1.0\r\nHost: {ip}\r\n\r\n".encode()
+        sock.sendall(req)
+        data = b""
+        start = time.time()
+        while time.time() - start < timeout:
+            chunk = sock.recv(1024)
+            if not chunk: break
+            data += chunk
+            if b"\r\n\r\n" in data: break
+        sock.close()
+        text = data.decode("utf-8", errors="ignore")
+        info = {}
+        for line in text.split("\r\n"):
+            if line.lower().startswith("server:"): info["server"] = line.split(":", 1)[1].strip()[:60]
+            if line.lower().startswith("x-powered-by:"): info["powered_by"] = line.split(":", 1)[1].strip()[:60]
+        return info
+    except Exception:
+        return {}
+
+def banner_grab(ip, port, timeout=1.5):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        sock.connect((ip, port))
+        try:
+            data = sock.recv(512)
+            sock.close()
+            return data.decode("utf-8", errors="ignore").strip()[:80]
+        except Exception:
+            sock.close()
+            return None
+    except Exception:
+        return None
+
+def reverse_dns(ip):
+    try:
+        return socket.gethostbyaddr(ip)[0]
+    except Exception:
+        return None
+
+# ============ Network Scanner ============
+class NetworkScanner:
+    def __init__(self, user_data, sounds):
+        self.devices = []
+        self.history = load_history()
+        self.my_ip = self.get_my_ip()
+        self.router_ip = self.get_router_ip()
+        self.subnet = ".".join(self.my_ip.split(".")[:3]) if self.my_ip else "192.168.1"
+        self.scanning = False
+        self.progress = 0
+        self.max_progress = 254
+        self.lock = threading.Lock()
+        self.stop_flag = False
+        self.user_data = user_data
+        self.sounds = sounds
+        self.new_device_mac = ""
+        self.new_device_alert_timer = 0
+        self.ping_history = {}
+        self.ghost_mode = user_data.get("ghost_mode", False)
+        self.ssdp_devices = {}
+        self.mdns_devices = {}
+        self.deep_scanning = False
+
+    def get_my_ip(self):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.settimeout(1)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except Exception:
+            return None
+
+    def get_router_ip(self):
+        if not self.my_ip: return None
+        return ".".join(self.my_ip.split(".")[:3]) + ".1"
+
+    def read_arp_table(self):
+        arp = {}
+        try:
+            with open("/proc/net/arp", "r") as f:
+                for line in f.readlines()[1:]:
+                    parts = line.split()
+                    if len(parts) >= 4:
+                        ip, mac = parts[0], parts[3]
+                        if mac != "00:00:00:00:00:00":
+                            arp[ip] = mac.upper()
+        except Exception:
+            pass
+        return arp
+
+    def ping(self, ip):
+        try:
+            r = subprocess.run(["ping", "-c", "1", "-W", "1", ip],
+                               stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL, timeout=2)
+            return r.returncode == 0
+        except Exception:
+            return False
+
+    def ping_detailed(self, ip):
+        try:
+            r = subprocess.run(["ping", "-c", "3", "-W", "1", ip],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.DEVNULL, timeout=5)
+            if r.returncode != 0:
+                return (False, 0, 100)
+            out = r.stdout.decode("utf-8", errors="ignore")
+            times = re.findall(r"time[=<]([\d.]+)\s*ms", out)
+            loss_m = re.search(r"(\d+)%\s*packet loss", out)
+            loss = int(loss_m.group(1)) if loss_m else 0
+            if times:
+                return (True, round(sum(float(t) for t in times) / len(times), 1), loss)
+            return (True, 0, loss)
+        except Exception:
+            return (False, 0, 100)
+
+    def scan_ports(self, ip):
+        ports = [21, 22, 23, 25, 53, 80, 110, 135, 139, 143, 161, 389, 443,
+                 445, 465, 514, 515, 548, 554, 587, 631, 636, 873, 993, 995,
+                 1080, 1433, 1521, 1723, 1883, 2049, 2181, 2375, 3000, 3128,
+                 3306, 3389, 3478, 4443, 5000, 5060, 5222, 5353, 5432, 5555,
+                 5601, 5672, 5900, 6379, 6443, 7000, 8000, 8080, 8081, 8443,
+                 8888, 9000, 9090, 9100, 9200, 10000, 11211, 27017, 50000,
+                 62078]
+        open_ports = []
+        for port in ports:
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.settimeout(0.15)
+                if s.connect_ex((ip, port)) == 0:
+                    open_ports.append(port)
+                s.close()
+            except Exception:
+                pass
+        return open_ports
+
+    def scan_ports_full(self, ip):
+        common = [21, 22, 23, 25, 53, 80, 110, 111, 123, 135, 137, 138, 139,
+                  143, 161, 162, 179, 389, 443, 445, 465, 500, 514, 515, 548,
+                  554, 587, 623, 631, 636, 646, 873, 902, 989, 990, 993, 995,
+                  1080, 1194, 1433, 1434, 1521, 1701, 1723, 1755, 1812, 1813,
+                  1883, 1900, 2049, 2082, 2083, 2181, 2222, 2323, 2375, 2376,
+                  2377, 2404, 2480, 2628, 3000, 3128, 3260, 3306, 3389, 3478,
+                  3479, 3689, 4443, 4500, 5000, 5060, 5061, 5222, 5269, 5353,
+                  5432, 5555, 5601, 5672, 5683, 5900, 5984, 6000, 6379, 6443,
+                  7000, 8000, 8008, 8080, 8081, 8086, 8088, 8090, 8123, 8181,
+                  8443, 8883, 8888, 9000, 9042, 9090, 9092, 9100, 9200, 9300,
+                  9418, 9999, 10000, 11211, 15672, 27017, 27018, 50000, 61616,
+                  62078]
+        open_ports = []
+        for port in common:
+            if self.stop_flag: return open_ports
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.settimeout(0.10)
+                if s.connect_ex((ip, port)) == 0:
+                    open_ports.append(port)
+                s.close()
+            except Exception:
+                pass
+        return open_ports
+
+    def get_hostname(self, ip):
+        try:
+            socket.setdefaulttimeout(1)
+            return socket.gethostbyaddr(ip)[0]
+        except Exception:
+            return ""
+
+    def scan_worker(self, ip_list):
+        for ip in ip_list:
+            if self.stop_flag: return
+            if self.ping(ip):
+                with self.lock:
+                    arp = self.read_arp_table()
+                    mac = arp.get(ip, "??:??:??:??:??:??")
+                    if mac == "??:??:??:??:??:??":
+                        rd = self.user_data.get("router_devices", {})
+                        if ip in rd: mac = rd[ip]
+                    hostname = self.get_hostname(ip)
+                    ttl = get_ttl(ip)
+                    os_guess = ttl_to_os(ttl)
+                    ports = []
+                    if ip not in (self.router_ip, self.my_ip):
+                        try: ports = self.scan_ports(ip)
+                        except Exception: ports = []
+                    device_type = detect_device_type(mac, hostname, ports, ttl)
+                    vendor = lookup_vendor(mac)
+                    dangerous = [p for p in ports if p in DANGEROUS_PORTS]
+                    http_info = {}
+                    if 80 in ports: http_info = http_grab(ip, 80)
+                    elif 8080 in ports: http_info = http_grab(ip, 8080)
+                    banners = {}
+                    for p in ports[:5]:
+                        if p in (21, 22, 25, 110, 143, 993, 995):
+                            b = banner_grab(ip, p)
+                            if b: banners[p] = b
+                    netbios = netbios_query(ip) if ip not in (self.router_ip, self.my_ip) else None
+                    rev_dns = reverse_dns(ip)
+                    try: ok, ping_ms, loss = self.ping_detailed(ip)
+                    except Exception: ping_ms, loss = 0, 0
+                    uptime_guess = "Unknown"
+                    if ping_ms > 0:
+                        if ping_ms < 5: uptime_guess = "Recent boot"
+                        elif ping_ms < 20: uptime_guess = "Running"
+                        else: uptime_guess = "Long uptime"
+                    known = self.user_data.get("known_devices", {}).get(mac)
+                    is_trusted = known is not None and known.get("trusted", False)
+                    custom_name = known.get("name", "") if known else ""
+                    if not custom_name:
+                        custom_name = netbios or hostname or vendor or "Unknown"
+                    if ip not in self.ping_history: self.ping_history[ip] = []
+                    self.ping_history[ip].append(ping_ms)
+                    if len(self.ping_history[ip]) > 50:
+                        self.ping_history[ip] = self.ping_history[ip][-50:]
+                    device = {
+                        "ip": ip, "mac": mac,
+                        "name": hostname if hostname else vendor,
+                        "netbios": netbios or "",
+                        "custom_name": custom_name,
+                        "vendor": vendor, "type": device_type,
+                        "os": os_guess, "ttl": ttl if ttl else 0,
+                        "ports": ports,
+                        "services": [lookup_service(p) for p in ports[:10]],
+                        "dangerous_ports": dangerous,
+                        "http_info": http_info, "banners": banners,
+                        "ping": ping_ms, "loss": loss,
+                        "trusted": is_trusted, "uptime": uptime_guess,
+                        "reverse_dns": rev_dns or "",
+                        "first_seen": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "kind": "me" if ip == self.my_ip else (
+                            "router" if ip == self.router_ip else "unknown"),
+                    }
+                    if not [d for d in self.devices if d["ip"] == ip]:
+                        self.devices.append(device)
+                        if device["kind"] == "unknown" and not is_trusted \
+                           and mac != "??:??:??:??:??:??":
+                            self.new_device_mac = mac
+                            self.new_device_alert_timer = 300
+                            if not self.ghost_mode and self.user_data.get("sound", True):
+                                self.sounds.play("alert")
+                            self.history.append({
+                                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "event": "new_device", "ip": ip,
+                                "mac": mac, "name": custom_name,
+                            })
+                            save_history(self.history)
+                        if dangerous:
+                            self.history.append({
+                                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "event": "dangerous_ports", "ip": ip,
+                                "mac": mac, "name": f"{len(dangerous)} open",
+                            })
+                            save_history(self.history)
+            with self.lock:
+                self.progress += 1
+
+    def start_scan(self):
+        if self.scanning: return
+        self.devices = []
+        self.progress = 0
+        self.stop_flag = False
+        self.scanning = True
+        def extra_discovery():
+            try: self.ssdp_devices = ssdp_discover(timeout=2)
+            except Exception: pass
+            try: self.mdns_devices = mdns_discover(timeout=2)
+            except Exception: pass
+        threading.Thread(target=extra_discovery, daemon=True).start()
+        priority = [self.router_ip] if self.router_ip else []
+        priority.append(self.my_ip)
+        priority = [ip for ip in priority if ip]
+        others = [f"{self.subnet}.{i}" for i in range(2, 255)]
+        others = [ip for ip in others if ip not in priority]
+        all_ips = priority + others
+        cs = max(1, len(all_ips) // 6)
+        chunks = [all_ips[i:i + cs] for i in range(0, len(all_ips), cs)]
+        for c in chunks:
+            threading.Thread(target=self.scan_worker, args=(c,), daemon=True).start()
+
+    def deep_scan(self, device):
+        self.deep_scanning = True
+        try:
+            ip = device["ip"]
+            ports = self.scan_ports_full(ip)
+            device["ports"] = ports
+            device["services"] = [lookup_service(p) for p in ports]
+            device["dangerous_ports"] = [p for p in ports if p in DANGEROUS_PORTS]
+            http_info = {}
+            for p in [80, 8080, 8000, 8008, 8443, 443, 8888]:
+                if p in ports:
+                    info = http_grab(ip, p)
+                    if info: http_info[p] = info
+            device["http_info"] = http_info
+            banners = {}
+            for p in ports[:15]:
+                b = banner_grab(ip, p)
+                if b: banners[p] = b
+            device["banners"] = banners
+        except Exception:
+            pass
+        self.deep_scanning = False
+
+    def stop_scan(self): self.stop_flag = True
+    def is_done(self):
+        if not self.scanning: return False
+        return self.progress >= self.max_progress
+
+# ============ Fonts ============
+_FONT_HUGE = _FONT_BIG = _FONT_MED = _FONT_SMALL = _FONT_MONO = _FONT_TINY = None
+
+def init_fonts():
+    global _FONT_HUGE, _FONT_BIG, _FONT_MED, _FONT_SMALL, _FONT_MONO, _FONT_TINY
+    base = min(SCREEN_W, SCREEN_H)
+    try:
+        _FONT_HUGE = pygame.font.SysFont("monospace", max(20, int(base*0.045)), bold=True)
+        _FONT_BIG = pygame.font.SysFont("monospace", max(16, int(base*0.032)), bold=True)
+        _FONT_MED = pygame.font.SysFont("monospace", max(14, int(base*0.024)), bold=True)
+        _FONT_SMALL = pygame.font.SysFont("monospace", max(11, int(base*0.018)), bold=True)
+        _FONT_MONO = pygame.font.SysFont("monospace", max(10, int(base*0.017)))
+        _FONT_TINY = pygame.font.SysFont("monospace", max(9, int(base*0.014)))
+    except Exception:
+        _FONT_HUGE = pygame.font.Font(None, 40)
+        _FONT_BIG = pygame.font.Font(None, 28)
+        _FONT_MED = pygame.font.Font(None, 22)
+        _FONT_SMALL = pygame.font.Font(None, 16)
+        _FONT_MONO = pygame.font.Font(None, 15)
+        _FONT_TINY = pygame.font.Font(None, 13)
+
+def draw_text_neon(surf, text, font, pos, color, glow=True, center=False):
+    if center:
+        base = font.render(text, True, color)
+        rect = base.get_rect(center=pos)
+    else:
+        base = font.render(text, True, color)
+        rect = base.get_rect(topleft=pos)
+    if glow:
+        gc = tuple(min(255, int(c * 0.5)) for c in color)
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            surf.blit(font.render(text, True, gc), (rect.x+dx, rect.y+dy),
+                      special_flags=pygame.BLEND_ADD)
+    surf.blit(base, rect)
+    return rect
+
+def draw_panel(surf, rect, border_color=None, fill_alpha=200):
+    if border_color is None: border_color = C("cyan")
+    panel = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+    panel.fill((*C("panel"), fill_alpha))
+    surf.blit(panel, rect.topleft)
+    for i in range(3):
+        alpha = 100 - i * 30
+        glow = pygame.Surface((rect.w + i*4, rect.h + i*4), pygame.SRCALPHA)
+        pygame.draw.rect(glow, (*border_color, alpha),
+                         (0, 0, rect.w + i*4, rect.h + i*4), 2, border_radius=8)
+        surf.blit(glow, (rect.x - i*2, rect.y - i*2))
+    pygame.draw.rect(surf, border_color, rect, 2, border_radius=8)
+
+def draw_grid_background(surf, w, h):
+    surf.fill(C("bg"))
+    for x in range(0, w, 40):
+        pygame.draw.line(surf, C("grid"), (x, 0), (x, h), 1)
+    for y in range(0, h, 40):
+        pygame.draw.line(surf, C("grid"), (0, y), (w, y), 1)
+
+class NeonButton:
+    def __init__(self, rect, text, action, color_key="cyan"):
+        self.rect = rect
+        self.text = text
+        self.action = action
+        self.color_key = color_key
+        self.pressed = False
+        self.flash = 0
+    @property
+    def color(self): return C(self.color_key)
+    def handle(self, e):
+        if e.type == pygame.FINGERDOWN:
+            x, y = e.x * SCREEN_W, e.y * SCREEN_H
+            if self.rect.collidepoint(x, y):
+                self.pressed = True; self.flash = 15; return True
+        elif e.type == pygame.FINGERUP: self.pressed = False
+        elif e.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(*e.pos):
+                self.pressed = True; self.flash = 15; return True
+        elif e.type == pygame.MOUSEBUTTONUP: self.pressed = False
+        return False
+    def draw(self, surf):
+        if self.flash > 0: self.flash -= 1
+        base = self.color
+        if self.pressed: base = tuple(min(255, c+60) for c in base)
+        gi = 3 if self.flash > 0 else 1
+        for i in range(gi, 0, -1):
+            alpha = 40 if self.flash > 0 else 20
+            glow = pygame.Surface((self.rect.w+i*6, self.rect.h+i*6), pygame.SRCALPHA)
+            pygame.draw.rect(glow, (*base, alpha),
+                             (0, 0, self.rect.w+i*6, self.rect.h+i*6), border_radius=12)
+            surf.blit(glow, (self.rect.x-i*3, self.rect.y-i*3))
+        pygame.draw.rect(surf, C("btn_bg"), self.rect, border_radius=10)
+        pygame.draw.rect(surf, base, self.rect, 3, border_radius=10)
+        txt = _FONT_MED.render(self.text, True, base)
+        surf.blit(txt, txt.get_rect(center=self.rect.center))
+
+SCREEN_W, SCREEN_H = 1280, 720
+
+# ============ Router Settings ============
+def show_router_settings(screen, clock, user_data, scanner):
+    user_input = user_data.get("router_user", "admin")
+    pass_input = user_data.get("router_pass", "")
+    editing = None
+    blink = 0
+    status_msg = ""
+    status_timer = 0
+    last_editing = None
+
+    presets = [
+        ("admin", "admin"),
+        ("admin", ""),
+        ("admin", "password"),
+        ("admin", "1234"),
+        ("root", "root"),
+        ("user", "user"),
+    ]
+
+    while True:
+        blink += 1
+        screen.fill(C("bg"))
+        for x in range(0, SCREEN_W, 40):
+            pygame.draw.line(screen, C("grid"), (x, 0), (x, SCREEN_H), 1)
+        for y in range(0, SCREEN_H, 40):
+            pygame.draw.line(screen, C("grid"), (0, y), (SCREEN_W, y), 1)
+
+        draw_text_neon(screen, "ROUTER SETTINGS", _FONT_BIG,
+                       (SCREEN_W//2, 30), C("cyan"), center=True)
+        t = _FONT_SMALL.render(f"Router IP: {scanner.router_ip or 'N/A'}",
+                                True, C("text_dim"))
+        screen.blit(t, t.get_rect(center=(SCREEN_W//2, 62)))
+
+        panel = pygame.Rect(int(SCREEN_W*0.08), int(SCREEN_H*0.12),
+                            int(SCREEN_W*0.84), int(SCREEN_H*0.80))
+        draw_panel(screen, panel)
+
+        y = panel.y + 30
+        lt = _FONT_MED.render("Username:", True, C("purple"))
+        screen.blit(lt, (panel.x+40, y))
+        user_rect = pygame.Rect(panel.x+int(panel.w*0.28), y-5,
+                                 int(panel.w*0.62), 38)
+        pygame.draw.rect(screen, C("btn_bg"), user_rect, border_radius=8)
+        pygame.draw.rect(screen, C("yellow") if editing=="user" else C("cyan"),
+                          user_rect, 2, border_radius=8)
+        cur = "|" if editing=="user" and blink%30<15 else ""
+        t = _FONT_MONO.render(user_input + cur, True, C("text"))
+        screen.blit(t, (user_rect.x+10, user_rect.y+10))
+
+        y += 60
+        lt = _FONT_MED.render("Password:", True, C("purple"))
+        screen.blit(lt, (panel.x+40, y))
+        pass_rect = pygame.Rect(panel.x+int(panel.w*0.28), y-5,
+                                 int(panel.w*0.62), 38)
+        pygame.draw.rect(screen, C("btn_bg"), pass_rect, border_radius=8)
+        pygame.draw.rect(screen, C("yellow") if editing=="pass" else C("cyan"),
+                          pass_rect, 2, border_radius=8)
+        cur = "|" if editing=="pass" and blink%30<15 else ""
+        masked = "*" * len(pass_input)
+        t = _FONT_MONO.render(masked + cur, True, C("text"))
+        screen.blit(t, (pass_rect.x+10, pass_rect.y+10))
+
+        y += 60
+        if status_timer > 0:
+            status_timer -= 1
+            col = C("green") if "OK" in status_msg else C("red")
+            t = _FONT_SMALL.render(status_msg, True, col)
+            screen.blit(t, (panel.x+40, y))
+
+        y += 40
+        pt = _FONT_SMALL.render("Quick Presets (tap to fill):", True, C("yellow"))
+        screen.blit(pt, (panel.x+40, y))
+        y += 25
+        preset_buttons = []
+        for i, (u, p) in enumerate(presets):
+            col = i % 3
+            row = i // 3
+            px = panel.x + 40 + col * int(panel.w * 0.28)
+            py_ = y + row * 32
+            label = f"{u}/{p if p else 'blank'}"
+            btn = NeonButton(pygame.Rect(px, py_, int(panel.w * 0.26), 28),
+                             label, f"preset_{i}", "purple")
+            preset_buttons.append((btn, u, p))
+            btn.draw(screen)
+
+        btn_y = panel.bottom - 55
+        bw = int(panel.w*0.28)
+        bh = 45
+        b1 = NeonButton(pygame.Rect(panel.x+40, btn_y, bw, bh),
+                        "FETCH DEVICES", "fetch", "green")
+        b2 = NeonButton(pygame.Rect(panel.centerx-bw//2, btn_y, bw, bh),
+                        "SAVE", "save", "cyan")
+        b3 = NeonButton(pygame.Rect(panel.right-40-bw, btn_y, bw, bh),
+                        "BACK", "back", "yellow")
+        buttons = [b1, b2, b3]
+        for b in buttons: b.draw(screen)
+
+        if editing != last_editing:
+            last_editing = editing
+            try:
+                if editing == "user":
+                    pygame.key.start_text_input()
+                    pygame.key.set_text_input_rect(user_rect)
+                elif editing == "pass":
+                    pygame.key.start_text_input()
+                    pygame.key.set_text_input_rect(pass_rect)
+                else:
+                    pygame.key.stop_text_input()
+            except Exception:
+                pass
+
+        pygame.display.flip()
+
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                try: pygame.key.stop_text_input()
+                except Exception: pass
+                return
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    try: pygame.key.stop_text_input()
+                    except Exception: pass
+                    return
+                if editing:
+                    if e.key == pygame.K_BACKSPACE:
+                        if editing == "user": user_input = user_input[:-1]
+                        else: pass_input = pass_input[:-1]
+                    elif e.key == pygame.K_RETURN:
+                        editing = None
+                    elif e.key == pygame.K_TAB:
+                        editing = "pass" if editing == "user" else "user"
+                    elif 32 <= e.key < 127:
+                        if editing == "user" and len(user_input) < 30:
+                            user_input += chr(e.key)
+                        elif editing == "pass" and len(pass_input) < 30:
+                            pass_input += chr(e.key)
+            elif e.type == pygame.TEXTINPUT and editing:
+                for ch in e.text:
+                    if 32 <= ord(ch) < 127:
+                        if editing == "user" and len(user_input) < 30:
+                            user_input += ch
+                        elif editing == "pass" and len(pass_input) < 30:
+                            pass_input += ch
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                clicked_preset = False
+                for btn, u, p in preset_buttons:
+                    if btn.rect.collidepoint(e.pos):
+                        user_input = u; pass_input = p
+                        clicked_preset = True; break
+                if clicked_preset: continue
+                if user_rect.collidepoint(e.pos): editing = "user"
+                elif pass_rect.collidepoint(e.pos): editing = "pass"
+                else: editing = None
+                for b in buttons:
+                    if b.handle(e):
+                        if b.action == "save":
+                            user_data["router_user"] = user_input
+                            user_data["router_pass"] = pass_input
+                            save_user_data(user_data)
+                            status_msg = "Saved OK"
+                            status_timer = 120
+                        elif b.action == "fetch":
+                            user_data["router_user"] = user_input
+                            user_data["router_pass"] = pass_input
+                            save_user_data(user_data)
+                            status_msg = "Fetching... please wait"
+                            status_timer = 300
+                            pygame.display.flip()
+                            devices = fetch_router_devices(
+                                scanner.router_ip, user_input, pass_input)
+                            if devices:
+                                for d in devices:
+                                    user_data["router_devices"][d["ip"]] = d["mac"]
+                                save_user_data(user_data)
+                                status_msg = f"OK - {len(devices)} devices found"
+                            else:
+                                status_msg = "Failed - Router not supported"
+                            status_timer = 240
+                        elif b.action == "back":
+                            user_data["router_user"] = user_input
+                            user_data["router_pass"] = pass_input
+                            save_user_data(user_data)
+                            try: pygame.key.stop_text_input()
+                            except Exception: pass
+                            return
+            elif e.type == pygame.FINGERDOWN:
+                x, y_pos = e.x*SCREEN_W, e.y*SCREEN_H
+                clicked_preset = False
+                for btn, u, p in preset_buttons:
+                    if btn.rect.collidepoint(x, y_pos):
+                        user_input = u; pass_input = p
+                        clicked_preset = True; break
+                if clicked_preset: continue
+                if user_rect.collidepoint(x, y_pos): editing = "user"
+                elif pass_rect.collidepoint(x, y_pos): editing = "pass"
+                else: editing = None
+                for b in buttons:
+                    if b.rect.collidepoint(x, y_pos):
+                        if b.action == "save":
+                            user_data["router_user"] = user_input
+                            user_data["router_pass"] = pass_input
+                            save_user_data(user_data)
+                            status_msg = "Saved OK"
+                            status_timer = 120
+                        elif b.action == "fetch":
+                            user_data["router_user"] = user_input
+                            user_data["router_pass"] = pass_input
+                            save_user_data(user_data)
+                            status_msg = "Fetching..."
+                            status_timer = 300
+                            devices = fetch_router_devices(
+                                scanner.router_ip, user_input, pass_input)
+                            if devices:
+                                for d in devices:
+                                    user_data["router_devices"][d["ip"]] = d["mac"]
+                                save_user_data(user_data)
+                                status_msg = f"OK - {len(devices)} devices"
+                            else:
+                                status_msg = "Failed - unsupported"
+                            status_timer = 240
+                        elif b.action == "back":
+                            user_data["router_user"] = user_input
+                            user_data["router_pass"] = pass_input
+                            save_user_data(user_data)
+                            try: pygame.key.stop_text_input()
+                            except Exception: pass
+                            return
+        clock.tick(30)
+
+# ============ Device Details ============
+def show_device_details(screen, clock, device, user_data, sounds, scanner):
+    name_input = device.get("custom_name", "")
+    editing = False
+    blink = 0
+    scroll = 0
+    last_editing = False
+
+    while True:
+        blink += 1
+        screen.fill(C("bg"))
+        for x in range(0, SCREEN_W, 40):
+            pygame.draw.line(screen, C("grid"), (x, 0), (x, SCREEN_H), 1)
+        for y in range(0, SCREEN_H, 40):
+            pygame.draw.line(screen, C("grid"), (0, y), (SCREEN_W, y), 1)
+        draw_text_neon(screen, "DEVICE DETAILS", _FONT_BIG,
+                       (SCREEN_W//2, 30), C("cyan"), center=True)
+        panel = pygame.Rect(int(SCREEN_W*0.05), int(SCREEN_H*0.10),
+                            int(SCREEN_W*0.90), int(SCREEN_H*0.78))
+        draw_panel(screen, panel)
+        pad = 20
+        inner_y = panel.y + pad
+        inner_h = panel.h - pad*2 - 60
+        clip = pygame.Rect(panel.x+pad, inner_y, panel.w-pad*2, inner_h)
+        old = screen.get_clip()
+        screen.set_clip(clip)
+        y = inner_y - scroll
+        line_h = max(22, int(SCREEN_H*0.034))
+
+        def kv(label, value, col=None):
+            nonlocal y
+            if y + line_h < inner_y or y > inner_y + inner_h:
+                y += line_h; return
+            lt = _FONT_SMALL.render(label, True, C("purple"))
+            screen.blit(lt, (panel.x+pad, y))
+            vt = _FONT_MONO.render(str(value), True, col or C("text"))
+            screen.blit(vt, (panel.x+int(panel.w*0.38), y))
+            y += line_h
+
+        kv("IP", device["ip"])
+        kv("MAC", device["mac"], C("yellow"))
+        kv("Vendor", device.get("vendor", "Unknown"))
+        kv("Device Type", device.get("type", "Unknown"), C("cyan"))
+        kv("OS (TTL)", device.get("os", "Unknown"), C("green"))
+        kv("TTL", device.get("ttl", 0))
+        kv("Hostname", device.get("name", "Unknown"))
+        if device.get("netbios"): kv("NetBIOS", device["netbios"], C("yellow"))
+        if device.get("reverse_dns"): kv("Reverse DNS", device["reverse_dns"])
+        kv("Ping", f"{device.get('ping', 0)} ms")
+        kv("Packet Loss", f"{device.get('loss', 0)} %")
+        kv("Uptime Guess", device.get("uptime", "Unknown"))
+        tc = C("green") if device.get("trusted") else C("red")
+        kv("Trust", "TRUSTED" if device.get("trusted") else "UNTRUSTED", tc)
+        ports = device.get("ports", [])
+        if ports:
+            kv("Open Ports", f"{len(ports)} ports", C("cyan"))
+            for p in ports[:15]:
+                svc = lookup_service(p)
+                dg = p in DANGEROUS_PORTS
+                kv(f"  :{p}", svc, C("red") if dg else C("text_dim"))
+        else:
+            kv("Open Ports", "None detected")
+        dangerous = device.get("dangerous_ports", [])
+        if dangerous: kv("DANGER", f"{len(dangerous)} risky", C("red"))
+        http_info = device.get("http_info", {})
+        if http_info:
+            for port, info in http_info.items():
+                if info.get("server"): kv(f"HTTP:{port}", info["server"], C("green"))
+        banners = device.get("banners", {})
+        if banners:
+            for p, b in list(banners.items())[:4]:
+                kv(f"Banner :{p}", b[:40], C("purple"))
+        ip = device["ip"]
+        if ip in scanner.ssdp_devices:
+            info = scanner.ssdp_devices[ip]
+            kv("SSDP Server", info.get("server", "")[:40], C("cyan"))
+        y += 5
+        nt = _FONT_SMALL.render("Custom Name:", True, C("purple"))
+        screen.blit(nt, (panel.x+pad, y))
+        input_rect = pygame.Rect(panel.x+int(panel.w*0.38), y-4,
+                                  int(panel.w*0.55), 30)
+        pygame.draw.rect(screen, C("btn_bg"), input_rect, border_radius=6)
+        pygame.draw.rect(screen, C("yellow") if editing else C("cyan"),
+                          input_rect, 2, border_radius=6)
+        cursor = "|" if editing and blink % 30 < 15 else ""
+        t = _FONT_MONO.render(name_input + cursor, True, C("text"))
+        screen.blit(t, (input_rect.x+8, input_rect.y+5))
+        screen.set_clip(old)
+
+        if scanner.deep_scanning:
+            lb = pygame.Surface((int(SCREEN_W*0.5), 36), pygame.SRCALPHA)
+            lb.fill((*C("yellow"), 220))
+            screen.blit(lb, (SCREEN_W//2 - lb.get_width()//2, panel.bottom - 100))
+            txt = _FONT_MED.render("DEEP SCANNING... please wait", True, C("bg"))
+            screen.blit(txt, txt.get_rect(center=(SCREEN_W//2, panel.bottom - 82)))
+
+        btn_y = panel.bottom - 50
+        bw = int(panel.w*0.20)
+        bh = 40
+        gap = int(panel.w*0.02)
+        b1 = NeonButton(pygame.Rect(panel.x+pad, btn_y, bw, bh), "EDIT NAME", "edit", "yellow")
+        b2 = NeonButton(pygame.Rect(panel.x+pad+bw+gap, btn_y, bw, bh),
+                        "TRUST" if not device.get("trusted") else "UNTRUST",
+                        "trust", "green" if not device.get("trusted") else "red")
+        b3 = NeonButton(pygame.Rect(panel.x+pad+(bw+gap)*2, btn_y, bw, bh),
+                        "DEEP SCAN", "deep", "purple")
+        b4 = NeonButton(pygame.Rect(panel.x+pad+(bw+gap)*3, btn_y, bw, bh),
+                        "BACK", "back", "cyan")
+        buttons = [b1, b2, b3, b4]
+        for b in buttons: b.draw(screen)
+
+        if editing != last_editing:
+            last_editing = editing
+            try:
+                if editing:
+                    pygame.key.start_text_input()
+                    pygame.key.set_text_input_rect(input_rect)
+                else:
+                    pygame.key.stop_text_input()
+            except Exception:
+                pass
+
+        pygame.display.flip()
+
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                try: pygame.key.stop_text_input()
+                except Exception: pass
+                return False
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    try: pygame.key.stop_text_input()
+                    except Exception: pass
+                    return True
+                if editing:
+                    if e.key == pygame.K_BACKSPACE:
+                        name_input = name_input[:-1]
+                    elif e.key == pygame.K_RETURN:
+                        editing = False
+                        mac = device["mac"]
+                        kd = user_data.setdefault("known_devices", {})
+                        kd.setdefault(mac, {})["name"] = name_input
+                        device["custom_name"] = name_input
+                        save_user_data(user_data)
+                    elif 32 <= e.key < 127 and len(name_input) < 24:
+                        name_input += chr(e.key)
+            elif e.type == pygame.TEXTINPUT and editing:
+                for ch in e.text:
+                    if 32 <= ord(ch) < 127 and len(name_input) < 24:
+                        name_input += ch
+            elif e.type == pygame.MOUSEWHEEL:
+                scroll -= e.y * 20
+                scroll = max(0, scroll)
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                if input_rect.collidepoint(e.pos): editing = True
+                else: editing = False
+                for b in buttons:
+                    if b.handle(e):
+                        if b.action == "edit": editing = True
+                        elif b.action == "trust":
+                            mac = device["mac"]
+                            kd = user_data.setdefault("known_devices", {})
+                            kd.setdefault(mac, {})
+                            nt2 = not device.get("trusted")
+                            kd[mac]["trusted"] = nt2
+                            if name_input: kd[mac]["name"] = name_input
+                            device["trusted"] = nt2
+                            device["custom_name"] = name_input or device.get("name", "")
+                            save_user_data(user_data)
+                            if nt2: sounds.play("success")
+                        elif b.action == "deep":
+                            threading.Thread(target=scanner.deep_scan,
+                                              args=(device,), daemon=True).start()
+                        elif b.action == "back":
+                            if name_input:
+                                mac = device["mac"]
+                                kd = user_data.setdefault("known_devices", {})
+                                kd.setdefault(mac, {})["name"] = name_input
+                                device["custom_name"] = name_input
+                                save_user_data(user_data)
+                            try: pygame.key.stop_text_input()
+                            except Exception: pass
+                            return True
+            elif e.type == pygame.FINGERDOWN:
+                x, yp = e.x*SCREEN_W, e.y*SCREEN_H
+                if input_rect.collidepoint(x, yp): editing = True
+                else: editing = False
+                for b in buttons:
+                    if b.rect.collidepoint(x, yp):
+                        if b.action == "edit": editing = True
+                        elif b.action == "trust":
+                            mac = device["mac"]
+                            kd = user_data.setdefault("known_devices", {})
+                            kd.setdefault(mac, {})
+                            nt2 = not device.get("trusted")
+                            kd[mac]["trusted"] = nt2
+                            if name_input: kd[mac]["name"] = name_input
+                            device["trusted"] = nt2
+                            device["custom_name"] = name_input or device.get("name", "")
+                            save_user_data(user_data)
+                            if nt2: sounds.play("success")
+                        elif b.action == "deep":
+                            threading.Thread(target=scanner.deep_scan,
+                                              args=(device,), daemon=True).start()
+                        elif b.action == "back":
+                            if name_input:
+                                mac = device["mac"]
+                                kd = user_data.setdefault("known_devices", {})
+                                kd.setdefault(mac, {})["name"] = name_input
+                                device["custom_name"] = name_input
+                                save_user_data(user_data)
+                            try: pygame.key.stop_text_input()
+                            except Exception: pass
+                            return True
+        clock.tick(30)
+
+# ============ History ============
+def show_history(screen, clock):
+    history = load_history()
+    scroll = 0
+    while True:
+        screen.fill(C("bg"))
+        for x in range(0, SCREEN_W, 40):
+            pygame.draw.line(screen, C("grid"), (x, 0), (x, SCREEN_H), 1)
+        for y in range(0, SCREEN_H, 40):
+            pygame.draw.line(screen, C("grid"), (0, y), (SCREEN_W, y), 1)
+        draw_text_neon(screen, "HISTORY LOG", _FONT_BIG,
+                       (SCREEN_W//2, 40), C("cyan"), center=True)
+        panel = pygame.Rect(int(SCREEN_W*0.05), int(SCREEN_H*0.13),
+                            int(SCREEN_W*0.90), int(SCREEN_H*0.72))
+        draw_panel(screen, panel)
+        pad = 15
+        inner_y = panel.y + pad
+        inner_h = panel.h - pad*2 - 50
+        clip = pygame.Rect(panel.x+pad, inner_y, panel.w-pad*2, inner_h)
+        old = screen.get_clip()
+        screen.set_clip(clip)
+        row_h = max(26, int(SCREEN_H*0.04))
+        items = list(reversed(history))
+        for i, item in enumerate(items):
+            y = inner_y + i*row_h - scroll
+            if y+row_h < inner_y or y > inner_y+inner_h: continue
+            ev = item.get("event", "")
+            if ev == "new_device": col = C("red")
+            elif ev == "dangerous_ports": col = C("yellow")
+            else: col = C("green")
+            txt = f"[{item.get('time','')}] {ev.upper()}: {item.get('ip','')} / {item.get('name','')}"
+            t = _FONT_MONO.render(txt, True, col)
+            screen.blit(t, (inner_y, y))
+        screen.set_clip(old)
+        if not history:
+            t = _FONT_MED.render("No history", True, C("text_dim"))
+            screen.blit(t, t.get_rect(center=panel.center))
+        back = NeonButton(pygame.Rect(panel.centerx-100, panel.bottom-55, 200, 42),
+                          "BACK", "back", "cyan")
+        back.draw(screen)
+        pygame.display.flip()
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT: return
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE: return
+            if e.type == pygame.MOUSEWHEEL:
+                scroll -= e.y*30
+                scroll = max(0, min(scroll, max(0, len(items)*row_h - inner_h)))
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                if back.handle(e): return
+            elif e.type == pygame.FINGERDOWN:
+                x, y = e.x*SCREEN_W, e.y*SCREEN_H
+                if back.rect.collidepoint(x, y): return
+        clock.tick(30)
+
+# ============ Stats ============
+def show_stats(screen, clock, scanner, user_data):
+    while True:
+        screen.fill(C("bg"))
+        for x in range(0, SCREEN_W, 40):
+            pygame.draw.line(screen, C("grid"), (x, 0), (x, SCREEN_H), 1)
+        for y in range(0, SCREEN_H, 40):
+            pygame.draw.line(screen, C("grid"), (0, y), (SCREEN_W, y), 1)
+        draw_text_neon(screen, "STATISTICS", _FONT_BIG,
+                       (SCREEN_W//2, 40), C("cyan"), center=True)
+        panel = pygame.Rect(int(SCREEN_W*0.10), int(SCREEN_H*0.15),
+                            int(SCREEN_W*0.80), int(SCREEN_H*0.68))
+        draw_panel(screen, panel)
+        devices = scanner.devices
+        total = len(devices)
+        trusted = sum(1 for d in devices if d.get("trusted"))
+        unknown = total - trusted
+        routers = sum(1 for d in devices if d.get("kind") == "router")
+        dangerous = sum(1 for d in devices if d.get("dangerous_ports"))
+        history = load_history()
+        total_new = sum(1 for h in history if h.get("event") == "new_device")
+        stats = [
+            ("Total Devices", str(total), "cyan"),
+            ("Trusted", str(trusted), "green"),
+            ("Unknown", str(unknown), "red"),
+            ("Routers", str(routers), "yellow"),
+            ("Risky Devices", str(dangerous), "yellow"),
+            ("New Devices Ever", str(total_new), "purple"),
+            ("History Events", str(len(history)), "blue"),
+            ("Router MACs", str(len(user_data.get("router_devices", {}))), "cyan"),
+        ]
+        pad = 40
+        y = panel.y + pad
+        lh = max(30, int(SCREEN_H*0.048))
+        for label, value, col in stats:
+            lt = _FONT_MED.render(label, True, C("text"))
+            screen.blit(lt, (panel.x+pad, y))
+            vt = _FONT_BIG.render(value, True, C(col))
+            screen.blit(vt, (panel.right-pad-vt.get_width(), y-5))
+            y += lh
+        back = NeonButton(pygame.Rect(panel.centerx-100, panel.bottom-55, 200, 42),
+                          "BACK", "back", "cyan")
+        back.draw(screen)
+        pygame.display.flip()
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT: return
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE: return
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                if back.handle(e): return
+            elif e.type == pygame.FINGERDOWN:
+                x, y = e.x*SCREEN_W, e.y*SCREEN_H
+                if back.rect.collidepoint(x, y): return
+        clock.tick(30)
+
+# ============ Network Graph ============
+def show_network_graph(screen, clock, scanner):
+    rot = 0
+    while True:
+        rot += 0.01
+        screen.fill(C("bg"))
+        for x in range(0, SCREEN_W, 40):
+            pygame.draw.line(screen, C("grid"), (x, 0), (x, SCREEN_H), 1)
+        for y in range(0, SCREEN_H, 40):
+            pygame.draw.line(screen, C("grid"), (0, y), (SCREEN_W, y), 1)
+        draw_text_neon(screen, "NETWORK MAP", _FONT_BIG,
+                       (SCREEN_W//2, 40), C("cyan"), center=True)
+        cx, cy = SCREEN_W//2, SCREEN_H//2 + 20
+        rc = 40
+        ring = min(SCREEN_W, SCREEN_H)//3
+        pygame.draw.circle(screen, C("yellow"), (cx, cy), rc, 3)
+        t = _FONT_SMALL.render("ROUTER", True, C("yellow"))
+        screen.blit(t, t.get_rect(center=(cx, cy)))
+        devices = [d for d in scanner.devices if d.get("kind") != "router"]
+        n = len(devices)
+        if n > 0:
+            for i, dev in enumerate(devices):
+                angle = rot + i * (2*math.pi/n)
+                dx = cx + math.cos(angle)*ring
+                dy = cy + math.sin(angle)*ring
+                if dev.get("kind") == "me": col = C("green")
+                elif dev.get("trusted"): col = C("blue")
+                elif dev.get("dangerous_ports"): col = C("red")
+                else: col = C("purple")
+                pygame.draw.line(screen, col, (cx, cy), (dx, dy), 2)
+                pygame.draw.circle(screen, col, (int(dx), int(dy)), 18, 2)
+                pygame.draw.circle(screen, col, (int(dx), int(dy)), 8)
+                label = dev.get("custom_name", "?")
+                if len(label) > 12: label = label[:11] + "…"
+                t = _FONT_TINY.render(label, True, col)
+                screen.blit(t, t.get_rect(center=(dx, dy+30)))
+        if not devices:
+            t = _FONT_MED.render("No devices yet", True, C("text_dim"))
+            screen.blit(t, t.get_rect(center=(cx, cy+150)))
+        back = NeonButton(pygame.Rect(SCREEN_W//2-100, SCREEN_H-70, 200, 42),
+                          "BACK", "back", "cyan")
+        back.draw(screen)
+        pygame.display.flip()
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT: return
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE: return
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                if back.handle(e): return
+            elif e.type == pygame.FINGERDOWN:
+                x, y = e.x*SCREEN_W, e.y*SCREEN_H
+                if back.rect.collidepoint(x, y): return
+        clock.tick(30)
+
+# ============ Speed Test ============
+def show_speed_test(screen, clock, scanner):
+    result = None
+    testing = False
+    def run():
+        nonlocal result, testing
+        testing = True
+        try:
+            start = time.time()
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(10)
+            s.connect(("1.1.1.1", 80))
+            s.sendall(b"GET / HTTP/1.0\r\nHost: 1.1.1.1\r\n\r\n")
+            total = 0
+            while time.time() - start < 5:
+                data = s.recv(65536)
+                if not data: break
+                total += len(data)
+                if total > 3_000_000: break
+            el = time.time() - start
+            s.close()
+            dl = round((total * 8) / (el * 1_000_000), 2)
+            _, ping_ms, _ = scanner.ping_detailed("1.1.1.1")
+            result = {"download": dl, "ping": ping_ms}
+        except Exception as ex:
+            result = {"download": 0, "ping": 0, "error": str(ex)[:40]}
+        testing = False
+    threading.Thread(target=run, daemon=True).start()
+    while True:
+        screen.fill(C("bg"))
+        for x in range(0, SCREEN_W, 40):
+            pygame.draw.line(screen, C("grid"), (x, 0), (x, SCREEN_H), 1)
+        for y in range(0, SCREEN_H, 40):
+            pygame.draw.line(screen, C("grid"), (0, y), (SCREEN_W, y), 1)
+        draw_text_neon(screen, "SPEED TEST", _FONT_BIG,
+                       (SCREEN_W//2, 40), C("cyan"), center=True)
+        panel = pygame.Rect(int(SCREEN_W*0.15), int(SCREEN_H*0.20),
+                            int(SCREEN_W*0.70), int(SCREEN_H*0.55))
+        draw_panel(screen, panel)
+        if testing:
+            t = _FONT_BIG.render("Testing...", True, C("yellow"))
+            screen.blit(t, t.get_rect(center=panel.center))
+        elif result:
+            y = panel.y + 40
+            items = [
+                ("Download", f"{result.get('download', 0)} Mbps", "green"),
+                ("Ping", f"{result.get('ping', 0)} ms", "cyan"),
+            ]
+            for label, value, col in items:
+                lt = _FONT_MED.render(label, True, C("text"))
+                screen.blit(lt, (panel.x+40, y))
+                vt = _FONT_BIG.render(value, True, C(col))
+                screen.blit(vt, (panel.right-300, y-8))
+                y += 60
+            if result.get("error"):
+                t = _FONT_SMALL.render(result["error"], True, C("red"))
+                screen.blit(t, (panel.x+40, y))
+        else:
+            t = _FONT_MED.render("Starting...", True, C("text_dim"))
+            screen.blit(t, t.get_rect(center=panel.center))
+        back = NeonButton(pygame.Rect(panel.centerx-100, panel.bottom-60, 200, 45),
+                          "BACK", "back", "cyan")
+        back.draw(screen)
+        pygame.display.flip()
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT: return
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE: return
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                if back.handle(e): return
+            elif e.type == pygame.FINGERDOWN:
+                x, y = e.x*SCREEN_W, e.y*SCREEN_H
+                if back.rect.collidepoint(x, y): return
+        clock.tick(30)
+
+# ============ Export ============
+def export_html(scanner, user_data):
+    try:
+        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        rows = ""
+        for d in scanner.devices:
+            kl = {"me": "YOU", "router": "ROUTER"}.get(d.get("kind"), "UNKNOWN")
+            col = "#00ff88" if d.get("kind") == "me" else \
+                  "#ffcc00" if d.get("kind") == "router" else \
+                  "#00ccff" if d.get("trusted") else "#ff4466"
+            ports = ", ".join(str(p) for p in d.get("ports", [])[:20]) or "-"
+            rows += f"""<tr>
+<td style="color:{col};font-weight:bold">{d['ip']}</td>
+<td>{d['mac']}</td><td>{d.get('vendor','?')}</td>
+<td>{d.get('custom_name','?')}</td><td>{d.get('type','?')}</td>
+<td>{d.get('os','?')}</td><td style="color:{col}">{kl}</td>
+<td>{d.get('ping',0)} ms</td><td style="font-size:11px">{ports}</td></tr>"""
+        html = f"""<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>Network Report</title><style>
+body{{background:#0a0e1a;color:#c8e8ff;font-family:sans-serif;padding:20px}}
+h1{{color:#0ff;text-shadow:0 0 20px #0ff;text-align:center}}
+.info{{text-align:center;color:#80b4ff;margin-bottom:20px}}
+table{{width:100%;border-collapse:collapse;background:rgba(8,15,30,0.8);
+box-shadow:0 0 30px rgba(0,255,255,0.15);font-size:13px}}
+th{{background:rgba(0,100,150,0.5);color:#0ff;padding:8px;text-align:left;
+border-bottom:2px solid #0ff}} td{{padding:6px;border-bottom:1px solid rgba(0,200,255,0.15)}}
+</style></head><body>
+<h1>NETWORK SCAN REPORT</h1>
+<div class="info"><b>Time:</b> {ts} | <b>My IP:</b> {scanner.my_ip} |
+<b>Router:</b> {scanner.router_ip} | <b>Devices:</b> {len(scanner.devices)}</div>
+<table><thead><tr><th>IP</th><th>MAC</th><th>Vendor</th><th>Name</th>
+<th>Type</th><th>OS</th><th>Status</th><th>Ping</th><th>Ports</th></tr></thead>
+<tbody>{rows}</tbody></table></body></html>"""
+        with open("network_report.html", "w", encoding="utf-8") as f:
+            f.write(html)
+        return True
+    except Exception:
+        return False
+
+def export_csv(scanner):
+    try:
+        with open("network_report.csv", "w", encoding="utf-8", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["IP", "MAC", "Vendor", "Name", "Type", "OS", "TTL",
+                        "Ping", "Loss", "Ports", "Trusted", "First Seen"])
+            for d in scanner.devices:
+                w.writerow([
+                    d["ip"], d["mac"], d.get("vendor", ""),
+                    d.get("custom_name", ""), d.get("type", ""),
+                    d.get("os", ""), d.get("ttl", 0), d.get("ping", 0),
+                    d.get("loss", 0),
+                    ",".join(str(p) for p in d.get("ports", [])),
+                    "YES" if d.get("trusted") else "NO",
+                    d.get("first_seen", ""),
+                ])
+        return True
+    except Exception:
+        return False
+
+def export_backup(scanner, user_data):
+    try:
+        data = {
+            "exported": datetime.now().isoformat(),
+            "user_data": user_data,
+            "devices": scanner.devices,
+            "history": scanner.history,
+        }
+        with open(BACKUP_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception:
+        return False
+
+# ============ Build Buttons ============
+def build_buttons():
+    sm = int(SCREEN_W*0.02)
+    bm = int(SCREEN_H*0.02)
+    gx = int(SCREEN_W*0.010)
+    gy = int(SCREEN_H*0.008)
+    is_portrait = SCREEN_H > SCREEN_W
+    if is_portrait:
+        bw = (SCREEN_W - sm*2 - gx) // 2
+        bh = int(SCREEN_H*0.042)
+        th = bh*8 + gy*7
+        top = SCREEN_H - bm - th
+        x1, x2 = sm, sm + bw + gx
+        def B(x, r, text, action, color):
+            return NeonButton(pygame.Rect(x, top + r*(bh+gy), bw, bh),
+                              text, action, color)
+        return [
+            B(x1, 0, "SCAN", "scan", "cyan"),
+            B(x2, 0, "STOP", "stop", "red"),
+            B(x1, 1, "ROUTER", "router", "cyan"),
+            B(x2, 1, "HISTORY", "history", "purple"),
+            B(x1, 2, "STATS", "stats", "yellow"),
+            B(x2, 2, "MAP", "graph", "blue"),
+            B(x1, 3, "SPEED", "speed", "blue"),
+            B(x2, 3, "EXPORT HTML", "export_html", "green"),
+            B(x1, 4, "EXPORT CSV", "export_csv", "green"),
+            B(x2, 4, "BACKUP", "backup", "green"),
+            B(x1, 5, "THEME", "theme", "cyan"),
+            B(x2, 5, "GHOST", "ghost", "purple"),
+            B(x1, 6, "AUTO", "auto", "yellow"),
+            B(x2, 6, "HELP", "help", "blue"),
+            B(x1, 7, "ABOUT", "about", "purple"),
+            B(x2, 7, "EXIT", "exit", "red"),
+        ]
+    else:
+        bw = (SCREEN_W - sm*2 - gx*3) // 4
+        bh = int(SCREEN_H*0.062)
+        th = bh*4 + gy*3
+        top = SCREEN_H - bm - th
+        x0 = sm
+        def B(col, row, text, action, color):
+            x = x0 + col*(bw+gx)
+            y = top + row*(bh+gy)
+            return NeonButton(pygame.Rect(x, y, bw, bh), text, action, color)
+        return [
+            B(0, 0, "SCAN", "scan", "cyan"),
+            B(1, 0, "STOP", "stop", "red"),
+            B(2, 0, "ROUTER", "router", "cyan"),
+            B(3, 0, "HISTORY", "history", "purple"),
+            B(0, 1, "STATS", "stats", "yellow"),
+            B(1, 1, "NETWORK MAP", "graph", "blue"),
+            B(2, 1, "SPEED TEST", "speed", "blue"),
+            B(3, 1, "BACKUP", "backup", "green"),
+            B(0, 2, "EXPORT HTML", "export_html", "green"),
+            B(1, 2, "EXPORT CSV", "export_csv", "green"),
+            B(2, 2, "THEME", "theme", "cyan"),
+            B(3, 2, "GHOST", "ghost", "purple"),
+            B(0, 3, "AUTO", "auto", "yellow"),
+            B(1, 3, "HELP", "help", "blue"),
+            B(2, 3, "ABOUT", "about", "purple"),
+            B(3, 3, "EXIT", "exit", "red"),
+        ]
+
+# ============ Help ============
+def show_help(screen, clock):
+    while True:
+        screen.fill(C("bg"))
+        for x in range(0, SCREEN_W, 40):
+            pygame.draw.line(screen, C("grid"), (x, 0), (x, SCREEN_H), 1)
+        for y in range(0, SCREEN_H, 40):
+            pygame.draw.line(screen, C("grid"), (0, y), (SCREEN_W, y), 1)
+        draw_text_neon(screen, "HELP", _FONT_BIG,
+                       (SCREEN_W//2, 40), C("cyan"), center=True)
+        panel = pygame.Rect(int(SCREEN_W*0.08), int(SCREEN_H*0.13),
+                            int(SCREEN_W*0.84), int(SCREEN_H*0.72))
+        draw_panel(screen, panel)
+        lines = [
+            "SCAN        - Scan network",
+            "STOP        - Stop scan",
+            "ROUTER      - Router Integration (fetch MACs)",
+            "SPEED       - Internet speed test",
+            "HISTORY     - Event log",
+            "STATS       - Statistics",
+            "MAP         - Circular view",
+            "EXPORT HTML - Web report",
+            "EXPORT CSV  - Excel file",
+            "BACKUP      - JSON backup",
+            "THEME       - Toggle colors",
+            "GHOST       - Silent scan",
+            "AUTO        - Auto scan every 30s",
+            "",
+            "TAP device for full details:",
+            "OS, Type, Ports, Banners, SSDP",
+            "",
+            "DEEP SCAN for 100+ ports",
+            "",
+            "ROUTER: use presets if keyboard",
+            "does not appear on your device.",
+        ]
+        y = panel.y + 20
+        for line in lines:
+            col = C("yellow") if (line and line[0].isupper() and len(line) > 3 and line[1:4].strip()) else C("text")
+            t = _FONT_MONO.render(line, True, col)
+            screen.blit(t, (panel.x+30, y))
+            y += 26
+        back = NeonButton(pygame.Rect(panel.centerx-100, panel.bottom-55, 200, 42),
+                          "BACK", "back", "cyan")
+        back.draw(screen)
+        pygame.display.flip()
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT: return
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE: return
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                if back.handle(e): return
+            elif e.type == pygame.FINGERDOWN:
+                x, y = e.x*SCREEN_W, e.y*SCREEN_H
+                if back.rect.collidepoint(x, y): return
+        clock.tick(30)
+
+# ============ About ============
+def show_about(screen, clock):
+    while True:
+        screen.fill(C("bg"))
+        for x in range(0, SCREEN_W, 40):
+            pygame.draw.line(screen, C("grid"), (x, 0), (x, SCREEN_H), 1)
+        for y in range(0, SCREEN_H, 40):
+            pygame.draw.line(screen, C("grid"), (0, y), (SCREEN_W, y), 1)
+        draw_text_neon(screen, "ABOUT", _FONT_BIG,
+                       (SCREEN_W//2, 40), C("cyan"), center=True)
+        panel = pygame.Rect(int(SCREEN_W*0.10), int(SCREEN_H*0.20),
+                            int(SCREEN_W*0.80), int(SCREEN_H*0.55))
+        draw_panel(screen, panel)
+        lines = [
+            ("Network Scanner ULTIMATE V4", C("cyan")),
+            ("", C("text")),
+            ("40+ Professional Features", C("green")),
+            ("", C("text")),
+            ("* OS Fingerprinting (TTL)", C("text")),
+            ("* Device Type Detection", C("text")),
+            ("* Deep Port Scanning", C("text")),
+            ("* Service Detection", C("text")),
+            ("* SSDP / mDNS / NetBIOS", C("text")),
+            ("* HTTP Banner Grabbing", C("text")),
+            ("* Router Integration", C("text")),
+            ("* Dangerous Ports Alert", C("text")),
+            ("* Export HTML/CSV/JSON", C("text")),
+            ("", C("text")),
+            ("Python + Pygame", C("purple")),
+        ]
+        y = panel.y + 20
+        for line, col in lines:
+            t = _FONT_MONO.render(line, True, col)
+            screen.blit(t, (panel.x+30, y))
+            y += 24
+        back = NeonButton(pygame.Rect(panel.centerx-100, panel.bottom-55, 200, 42),
+                          "BACK", "back", "cyan")
+        back.draw(screen)
+        pygame.display.flip()
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT: return
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE: return
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                if back.handle(e): return
+            elif e.type == pygame.FINGERDOWN:
+                x, y = e.x*SCREEN_W, e.y*SCREEN_H
+                if back.rect.collidepoint(x, y): return
+        clock.tick(30)
+
+# ============ MAIN ============
+def main():
+    global SCREEN_W, SCREEN_H, THEME
+    pygame.init()
+    info = pygame.display.Info()
+    SCREEN_W = info.current_w
+    SCREEN_H = info.current_h
+    try:
+        screen = pygame.display.set_mode((SCREEN_W, SCREEN_H), pygame.FULLSCREEN)
+        aw, ah = screen.get_size()
+        SCREEN_W, SCREEN_H = aw, ah
+    except Exception:
+        screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
+    pygame.display.set_caption("Network Scanner ULTIMATE V4")
+    clock = pygame.time.Clock()
+    pygame.mouse.set_visible(False)
+    init_fonts()
+    user_data = load_user_data()
+    THEME = user_data.get("theme", "dark")
+    sounds = SoundBank()
+    scanner = NetworkScanner(user_data, sounds)
+    scanner.ghost_mode = user_data.get("ghost_mode", False)
+
+    buttons = build_buttons()
+    top_of_buttons = min(b.rect.y for b in buttons)
+    scroll_offset = 0
+    pulse = 0
+    last_auto = time.time()
+    auto_interval = 30
+    selected_device = None
+    alert_popup_timer = 0
+
+    running = True
+    while running:
+        pulse += 0.05
+        now = time.time()
+        if user_data.get("auto_scan", False) and not scanner.scanning:
+            if now - last_auto > auto_interval:
+                scanner.start_scan()
+                scroll_offset = 0
+                last_auto = now
+
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            elif e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    running = False
+                elif e.key == pygame.K_a:
+                    user_data["auto_scan"] = not user_data.get("auto_scan", False)
+                    save_user_data(user_data)
+                elif e.key == pygame.K_s and not scanner.scanning:
+                    scanner.start_scan()
+                    scroll_offset = 0
+                    last_auto = now
+            elif e.type == pygame.VIDEORESIZE:
+                SCREEN_W, SCREEN_H = e.w, e.h
+                buttons = build_buttons()
+                top_of_buttons = min(b.rect.y for b in buttons)
+            elif e.type == pygame.MOUSEWHEEL:
+                scroll_offset -= e.y*30
+                scroll_offset = max(0, scroll_offset)
+            else:
+                handled = False
+                for b in buttons:
+                    if b.handle(e):
+                        handled = True
+                        a = b.action
+                        if a == "scan":
+                            if not scanner.scanning:
+                                scanner.start_scan()
+                                scroll_offset = 0
+                                last_auto = now
+                        elif a == "stop":
+                            scanner.stop_scan()
+                        elif a == "export_html":
+                            export_html(scanner, user_data)
+                        elif a == "export_csv":
+                            export_csv(scanner)
+                        elif a == "backup":
+                            export_backup(scanner, user_data)
+                        elif a == "router":
+                            show_router_settings(screen, clock, user_data, scanner)
+                            buttons = build_buttons()
+                            top_of_buttons = min(b.rect.y for b in buttons)
+                        elif a == "history":
+                            show_history(screen, clock)
+                            buttons = build_buttons()
+                            top_of_buttons = min(b.rect.y for b in buttons)
+                        elif a == "stats":
+                            show_stats(screen, clock, scanner, user_data)
+                            buttons = build_buttons()
+                            top_of_buttons = min(b.rect.y for b in buttons)
+                        elif a == "graph":
+                            show_network_graph(screen, clock, scanner)
+                            buttons = build_buttons()
+                            top_of_buttons = min(b.rect.y for b in buttons)
+                        elif a == "speed":
+                            show_speed_test(screen, clock, scanner)
+                            buttons = build_buttons()
+                            top_of_buttons = min(b.rect.y for b in buttons)
+                        elif a == "help":
+                            show_help(screen, clock)
+                            buttons = build_buttons()
+                            top_of_buttons = min(b.rect.y for b in buttons)
+                        elif a == "about":
+                            show_about(screen, clock)
+                            buttons = build_buttons()
+                            top_of_buttons = min(b.rect.y for b in buttons)
+                        elif a == "theme":
+                            THEME = "light" if THEME == "dark" else "dark"
+                            user_data["theme"] = THEME
+                            save_user_data(user_data)
+                        elif a == "ghost":
+                            scanner.ghost_mode = not scanner.ghost_mode
+                            user_data["ghost_mode"] = scanner.ghost_mode
+                            save_user_data(user_data)
+                        elif a == "auto":
+                            user_data["auto_scan"] = not user_data.get("auto_scan", False)
+                            save_user_data(user_data)
+                            last_auto = now
+                        elif a == "exit":
+                            running = False
+                        break
+                if not handled and e.type == pygame.MOUSEBUTTONDOWN:
+                    mx, my = e.pos
+                    rh = max(24, int(SCREEN_H*0.04))
+                    for i, dev in enumerate(scanner.devices):
+                        ry = getattr(scanner, "_row_y", 200) + i*rh - scroll_offset
+                        if ry <= my <= ry + rh:
+                            selected_device = dev
+                            break
+                elif not handled and e.type == pygame.FINGERDOWN:
+                    mx, my = e.x*SCREEN_W, e.y*SCREEN_H
+                    rh = max(24, int(SCREEN_H*0.04))
+                    for i, dev in enumerate(scanner.devices):
+                        ry = getattr(scanner, "_row_y", 200) + i*rh - scroll_offset
+                        if ry <= my <= ry + rh:
+                            selected_device = dev
+                            break
+
+        if selected_device is not None:
+            if selected_device not in scanner.devices:
+                selected_device = None
+            else:
+                show_device_details(screen, clock, selected_device,
+                                    user_data, sounds, scanner)
+                selected_device = None
+                buttons = build_buttons()
+                top_of_buttons = min(b.rect.y for b in buttons)
+
+        if scanner.scanning and scanner.is_done():
+            scanner.scanning = False
+            scanner.history.append({
+                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "event": "scan_complete", "ip": scanner.my_ip,
+                "name": f"{len(scanner.devices)} devices",
+            })
+            save_history(scanner.history)
+
+        if scanner.new_device_alert_timer > 0:
+            scanner.new_device_alert_timer -= 1
+            alert_popup_timer = 180
+
+        draw_grid_background(screen, SCREEN_W, SCREEN_H)
+        is_narrow = SCREEN_W < 900
+        title_y = int(SCREEN_H*0.018)
+        tf = _FONT_BIG if is_narrow else _FONT_HUGE
+        draw_text_neon(screen, "NETWORK SCANNER ULTIMATE",
+                       tf, (SCREEN_W//2, title_y), C("cyan"), center=True)
+
+        info_y = title_y + int(SCREEN_H*0.050)
+        auto_s = "AUTO:ON" if user_data.get("auto_scan") else "AUTO:OFF"
+        if is_narrow:
+            info_text = f"{scanner.my_ip or 'N/A'}  •  {auto_s}"
+        else:
+            info_text = f"IP: {scanner.my_ip or 'N/A'}   Router: {scanner.router_ip or 'N/A'}   {auto_s}   Devices: {len(scanner.devices)}"
+        ic = C("green") if user_data.get("auto_scan") else C("blue")
+        draw_text_neon(screen, info_text, _FONT_SMALL,
+                       (SCREEN_W//2, info_y), ic, center=True, glow=False)
+
+        panel_top = info_y + int(SCREEN_H*0.030)
+        panel_bottom = top_of_buttons - int(SCREEN_H*0.012)
+        panel_h = max(60, panel_bottom - panel_top)
+        sm = int(SCREEN_W*0.025)
+        panel_rect = pygame.Rect(sm, panel_top, SCREEN_W - sm*2, panel_h)
+        draw_panel(screen, panel_rect)
+
+        pad = max(8, int(panel_rect.w*0.015))
+        inner_x = panel_rect.x + pad
+        inner_w = panel_rect.w - pad*2
+
+        col_num = inner_x
+        col_ip = inner_x + int(inner_w*0.03)
+        col_mac = inner_x + int(inner_w*0.18)
+        col_vendor = inner_x + int(inner_w*0.38)
+        col_type = inner_x + int(inner_w*0.55)
+        col_stat = inner_x + int(inner_w*0.85)
+
+        header_y = panel_rect.y + max(5, int(panel_rect.h*0.02))
+        headers = [("#", col_num), ("IP", col_ip), ("MAC", col_mac),
+                   ("VENDOR", col_vendor), ("TYPE/OS", col_type),
+                   ("STATUS", col_stat)]
+        for text, x in headers:
+            t = _FONT_SMALL.render(text, True, C("purple"))
+            screen.blit(t, (x, header_y))
+        pygame.draw.line(screen, C("purple"),
+                         (inner_x, header_y+18),
+                         (inner_x+inner_w, header_y+18), 1)
+
+        prog_y = header_y + 24
+        if scanner.scanning:
+            ratio = min(1.0, scanner.progress / max(1, scanner.max_progress))
+            pygame.draw.rect(screen, (20, 40, 60),
+                             (inner_x, prog_y, inner_w, 6), border_radius=4)
+            fw = int(inner_w*ratio)
+            if fw > 0:
+                pc = C("cyan")
+                pygame.draw.rect(screen, pc, (inner_x, prog_y, fw, 6), border_radius=4)
+            st = f"SCANNING... {int(ratio*100)}%  ({scanner.progress}/{scanner.max_progress})"
+        else:
+            st = f"DONE — {len(scanner.devices)} devices" if scanner.devices else "READY — press SCAN"
+        t = _FONT_SMALL.render(st, True, C("green") if not scanner.scanning else C("cyan"))
+        screen.blit(t, (inner_x, prog_y+10))
+
+        list_y = prog_y + 30
+        scanner._row_y = list_y
+        list_h = panel_rect.bottom - list_y - 5
+
+        if list_h > 20:
+            clip = pygame.Rect(panel_rect.x+4, list_y, panel_rect.w-8, list_h)
+            old = screen.get_clip()
+            screen.set_clip(clip)
+            rh = max(22, int(SCREEN_H*0.036))
+            for i, dev in enumerate(scanner.devices):
+                y = list_y + i*rh - scroll_offset
+                if y+rh < list_y or y > list_y+list_h: continue
+                if dev["kind"] == "me":
+                    rc = C("green"); st2 = "YOU"
+                elif dev["kind"] == "router":
+                    rc = C("yellow"); st2 = "ROUTER"
+                elif dev.get("trusted"):
+                    rc = C("blue"); st2 = "TRUSTED"
+                else:
+                    rc = C("red"); st2 = "UNKNOWN"
+                if i % 2 == 0:
+                    bg = pygame.Surface((clip.w, rh), pygame.SRCALPHA)
+                    bg.fill((*rc, 15))
+                    screen.blit(bg, (clip.x, y))
+                ty = y + rh//2 - 8
+                t = _FONT_MONO.render(str(i+1), True, rc); screen.blit(t, (col_num, ty))
+                t = _FONT_MONO.render(dev["ip"], True, C("text")); screen.blit(t, (col_ip, ty))
+                t = _FONT_MONO.render(dev["mac"], True, C("text_dim")); screen.blit(t, (col_mac, ty))
+                avail = int(inner_w*0.55) - int(inner_w*0.38)
+                mc = max(6, avail // max(6, int(SCREEN_W*0.008)))
+                ven = dev.get("vendor", "Unknown")
+                if len(ven) > mc: ven = ven[:mc-1] + "…"
+                t = _FONT_MONO.render(ven, True, C("text_dim")); screen.blit(t, (col_vendor, ty))
+                avail2 = int(inner_w*0.85) - int(inner_w*0.55)
+                mc2 = max(6, avail2 // max(6, int(SCREEN_W*0.008)))
+                tp = dev.get("type", "?")
+                os_s = dev.get("os", "")
+                tp_display = f"{tp[:mc2//2]} | {os_s[:mc2//2]}"
+                if len(tp_display) > mc2: tp_display = tp_display[:mc2-1] + "…"
+                nc = C("green") if dev.get("trusted") else C("text_dim")
+                t = _FONT_MONO.render(tp_display, True, nc); screen.blit(t, (col_type, ty))
+                t = _FONT_MONO.render(st2, True, rc); screen.blit(t, (col_stat, ty))
+            screen.set_clip(old)
+            if scanner.scanning:
+                sly = list_y + int((math.sin(pulse*0.7)+1)/2 * list_h)
+                sl = pygame.Surface((clip.w, 2), pygame.SRCALPHA)
+                sl.fill((*C("cyan"), 120))
+                screen.blit(sl, (clip.x, sly))
+
+        for b in buttons:
+            b.draw(screen)
+
+        if alert_popup_timer > 0:
+            alert_popup_timer -= 1
+            popup = pygame.Surface((int(SCREEN_W*0.6), 70), pygame.SRCALPHA)
+            popup.fill((*C("red"), 220))
+            screen.blit(popup, (SCREEN_W//2 - popup.get_width()//2, int(SCREEN_H*0.15)))
+            t = _FONT_MED.render("! NEW DEVICE DETECTED !", True, (255, 255, 255))
+            screen.blit(t, t.get_rect(center=(SCREEN_W//2, int(SCREEN_H*0.15)+25)))
+            t = _FONT_SMALL.render(scanner.new_device_mac, True, (255, 255, 255))
+            screen.blit(t, t.get_rect(center=(SCREEN_W//2, int(SCREEN_H*0.15)+48)))
+
+        tip = "Tap device for details  •  A=Auto  S=Scan"
+        t = _FONT_TINY.render(tip, True, C("text_dim"))
+        screen.blit(t, (SCREEN_W//2 - t.get_width()//2, 3))
+
+        pygame.display.flip()
+        clock.tick(FPS_TARGET)
+
+    save_user_data(user_data)
+    pygame.quit()
+    sys.exit()
+
+if __name__ == "__main__":
+    main()
+  </script>
+</body>
+</html>
