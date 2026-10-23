@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nexus Admin | لوحة المالك</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-dark: #05070a;
+      --surface: rgba(20, 25, 35, 0.7);
+      --neon-cyan: #00f0ff;
+      --neon-purple: #b000ff;
+      --neon-pink: #ff007f;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --glass-border: rgba(255, 255, 255, 0.15);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background-image: radial-gradient(circle at 10% 20%, rgba(176, 0, 255, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.15) 0%, transparent 40%);
+    }
+    #networkCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+
+    /* Glassmorphism Container */
+    .glass-panel {
+      background: var(--surface);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 40px 30px;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 240, 255, 0.05);
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .logo-icon {
+      font-size: 3rem;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5));
+    }
+
+    h2 { font-weight: 900; margin-bottom: 25px; font-size: 1.5rem; letter-spacing: 1px;}
+    
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+      text-align: right;
+    }
+    .input-group i {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+    .form-input {
+      width: 100%;
+      padding: 14px 45px 14px 15px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      font-size: 1rem;
+      outline: none;
+      transition: 0.3s;
+    }
+    .form-input:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+      color: #fff;
+    }
+    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
+    
+    .error-msg {
+      color: #ff2e63;
+      font-size: 0.9rem;
+      margin-top: 15px;
+      font-weight: bold;
+      display: none;
+      background: rgba(255, 46, 99, 0.1);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 46, 99, 0.3);
+    }
+
+    /* Dashboard Section */
+    #dashboardScreen { display: none; }
+    
+    .result-box {
+      margin-top: 20px;
+      background: rgba(0,0,0,0.5);
+      border: 1px dashed var(--neon-green);
+      border-radius: 12px;
+      padding: 20px;
+      font-family: monospace;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--neon-green);
+      letter-spacing: 2px;
+      display: none;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid #ff2e63;
+      color: #ff2e63;
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 0.9rem;
+    }
+    .btn-logout:hover { background: rgba(255, 46, 99, 0.1); }
+  </style>
+</head>
+<body>
+
+  <canvas id="networkCanvas"></canvas>
+
+  <!-- شاشة تسجيل الدخول -->
+  <div class="glass-panel" id="loginScreen">
+    <i class="fas fa-user-shield logo-icon"></i>
+    <h2>لوحة المالك</h2>
+    
+    <div class="input-group">
+      <i class="fas fa-user"></i>
+      <input type="text" id="username" class="form-input" placeholder="اسم المستخدم">
+    </div>
+    
+    <div class="input-group">
+      <i class="fas fa-lock" onclick="togglePassword()" style="cursor:pointer;"></i>
+      <input type="password" id="password" class="form-input" placeholder="كلمة المرور">
+    </div>
+    
+    <button class="btn btn-primary" onclick="login()">
+      <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+    </button>
+    
+    <div class="error-msg" id="errorMsg">اسم المستخدم أو كلمة المرور غير صحيحة!</div>
+  </div>
+
+  <!-- لوحة التحكم -->
+  <div class="glass-panel" id="dashboardScreen">
+    <i class="fas fa-cogs logo-icon"></i>
+    <h2>لوحة التحكم</h2>
+    
+    <div class="input-group">
+      <i class="fas fa-mobile-alt"></i>
+      <input type="text" id="deviceIdInput" class="form-input" placeholder="أدخل رقم جهاز الطالب (NX-XXXXXX)" style="text-align:center; direction:ltr;">
+    </div>
+    
+    <button class="btn btn-primary" onclick="generateCode()">
+      <i class="fas fa-key"></i> توليد كود التفعيل
+    </button>
+    
+    <div class="result-box" id="codeResult"></div>
+    
+    <button class="btn btn-logout" onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+    </button>
+  </div>
+
+  <script>
+    // بيانات الدخول
+    const ADMIN_USER = "v__x.963";
+    const ADMIN_PASS = "aboud963";
+
+    // التحقق من الجلسة
+    if (sessionStorage.getItem('nexus_admin_logged') === 'true') {
+      showDashboard();
+    }
+
+    function login() {
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+
+      if (user === ADMIN_USER && pass === ADMIN_PASS) {
+        sessionStorage.setItem('nexus_admin_logged', 'true');
+        errorMsg.style.display = 'none';
+        showDashboard();
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    function showDashboard() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboardScreen').style.display = 'block';
+    }
+
+    function logout() {
+      sessionStorage.removeItem('nexus_admin_logged');
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('dashboardScreen').style.display = 'none';
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('codeResult').style.display = 'none';
+      document.getElementById('deviceIdInput').value = '';
+    }
+
+    function togglePassword() {
+      const passInput = document.getElementById('password');
+      if (passInput.type === 'password') passInput.type = 'text';
+      else passInput.type = 'password';
+    }
+
+    // خوارزمية توليد الكود (يجب أن تتطابق مع الموقع الرئيسي)
+    function generateCode() {
+      const id = document.getElementById('deviceIdInput').value.trim().toUpperCase();
+      if (!id) { alert('يرجى إدخال رقم الجهاز أولاً!'); return; }
+      
+      const secret = "NexusStore2026!";
+      let str = id + secret;
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+          hash = (hash << 5) - hash + str.charCodeAt(i);
+          hash |= 0; 
+      }
+      let hex = Math.abs(hash).toString(16).toUpperCase();
+      while (hex.length < 8) hex = "0" + hex;
+      
+      const finalCode = "NX-" + hex;
+      const resultBox = document.getElementById('codeResult');
+      resultBox.style.display = 'block';
+      resultBox.innerHTML = finalCode;
+    }
+
+    // خلفية Canvas
+    const canvas = document.getElementById('networkCanvas'), ctx = canvas.getContext('2d');
+    let width, height, particles = [];
+    function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    class Particle {
+      constructor() { this.x = Math.random() * width; this.y = Math.random() * height; this.vx = (Math.random() - 0.5) * 0.5; this.vy = (Math.random() - 0.5) * 0.5; this.radius = Math.random() * 1.5 + 0.5; }
+      update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > width) this.vx *= -1; if (this.y < 0 || this.y > height) this.vy *= -1; }
+      draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = 'rgba(0, 240, 255, 0.4)'; ctx.fill(); }
+    }
+    for (let i = 0; i < 50; i++) particles.push(new Particle());
+    function animate() { ctx.clearRect(0, 0, width, height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
+  </script>
+</body>
+</html>
